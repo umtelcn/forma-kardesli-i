@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Yükleme animasyonları için stiller */
+.loader {
+  border: 4px solid #f3f4f6; /* gray-100 */
+  border-top: 4px solid #10b981; /* emerald-500 */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+.loader-small {
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sayfa geçiş animasyonu */
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* SSS Accordion için stiller */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-in-out, padding-top 0.5s ease-in-out,
+    padding-bottom 0.5s ease-in-out;
+}
+
+.faq-question.open + .faq-answer {
+  max-height: 200px; /* Cevabın sığacağı kadar bir yükseklik */
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
+}
+
+.faq-icon {
+  transition: transform 0.5s ease;
+}
+
+.faq-question.open .faq-icon {
+  transform: rotate(180deg);
+}
