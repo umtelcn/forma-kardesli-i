@@ -1,3 +1,6 @@
+// components/IbanPage.tsx
+'use client';
+
 import { useState } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -39,12 +42,12 @@ export default function IbanPage({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
+    <div className="min-h-screen bg-gray-50 px-4 py-8 animate-fadeIn">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="text-sm text-gray-500 mb-2">Adım 1 / 3</div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl font-bold text-gray-900">
             Banka Bilgileri
           </h1>
         </div>
@@ -54,7 +57,7 @@ export default function IbanPage({
           {/* Donation Summary */}
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gray-50 rounded-lg p-2 border border-gray-200">
+              <div className="w-16 h-16 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center justify-center">
                 <Image
                   src={donation.imageUrl || ''}
                   alt={donation.teamName || ''}
@@ -80,18 +83,18 @@ export default function IbanPage({
           <div className="p-6 space-y-6">
             {/* Recipient */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Alıcı Adı
               </label>
               <div className="relative">
-                <div className="bg-gray-50 border border-gray-300 rounded-md p-4 pr-12">
-                  <p className="text-gray-900 text-sm font-medium">
+                <div className="bg-gray-50 border border-gray-300 rounded-md p-4 pr-28">
+                  <p className="text-gray-900 text-sm font-medium truncate">
                     {aliciAdi}
                   </p>
                 </div>
                 <button
                   onClick={() => handleCopy(aliciAdi, 'alici')}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                     isAlıcıCopied
                       ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                       : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
@@ -99,7 +102,7 @@ export default function IbanPage({
                 >
                   <FontAwesomeIcon
                     icon={isAlıcıCopied ? faCheck : faCopy}
-                    className="w-3 h-3 mr-1"
+                    className="w-3 h-3 mr-1.5"
                   />
                   {isAlıcıCopied ? 'Kopyalandı' : 'Kopyala'}
                 </button>
@@ -108,18 +111,18 @@ export default function IbanPage({
 
             {/* IBAN */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 IBAN Numarası
               </label>
               <div className="relative">
-                <div className="bg-gray-50 border border-gray-300 rounded-md p-4 pr-12">
+                <div className="bg-gray-50 border border-gray-300 rounded-md p-4 pr-28">
                   <p className="font-mono text-gray-900 text-sm font-semibold">
                     {iban}
                   </p>
                 </div>
                 <button
                   onClick={() => handleCopy(iban, 'iban')}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                     isIbanCopied
                       ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                       : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
@@ -127,7 +130,7 @@ export default function IbanPage({
                 >
                   <FontAwesomeIcon
                     icon={isIbanCopied ? faCheck : faCopy}
-                    className="w-3 h-3 mr-1"
+                    className="w-3 h-3 mr-1.5"
                   />
                   {isIbanCopied ? 'Kopyalandı' : 'Kopyala'}
                 </button>
@@ -144,9 +147,8 @@ export default function IbanPage({
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">Bilgilendirme</p>
                   <p>
-                    Havale/EFT işleminizde alıcı adı kısmına "Çocuklar Üşümesin"
-                    yazmanız yeterlidir. Açıklama kısmına bağış yaptığınız takım
-                    adını belirtebilirsiniz.
+                    Alıcı adı kısmına kısaca &quot;Çocuklar Üşümesin&quot;
+                    yazmanız yeterlidir. 
                   </p>
                 </div>
               </div>
@@ -154,11 +156,11 @@ export default function IbanPage({
           </div>
 
           {/* Actions */}
-          <div className="p-6 border-t border-gray-200 bg-gray-50">
+          <div className="p-6 border-t border-gray-200 bg-gray-50/75 rounded-b-lg">
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={onBack}
-                className="sm:w-auto px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
               >
                 <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4" />
                 Geri
