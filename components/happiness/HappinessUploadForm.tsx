@@ -116,3 +116,4 @@ export default function HappinessUploadForm({ onBack }: HappinessUploadFormProps
     </div>
   );
 }
+
