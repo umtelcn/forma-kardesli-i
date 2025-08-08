@@ -62,6 +62,7 @@ export default function HappinessUploadForm({ onBack }: HappinessUploadFormProps
             <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
             Geri Dön
         </button>
+        {/* DÜZELTME: Tırnak işaretleri &quot; ile değiştirildi */}
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
             &quot;Mutluluk Anları&quot; Galerisine Yükle
         </h2>
