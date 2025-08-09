@@ -12,40 +12,58 @@ import {
 import { faInstagram, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { Team, Total, RecentDonation } from '../lib/types';
 
-// Donor kimliğini render eden yardımcı bileşen
-const DonorIdentifier = ({ donor }: { donor: RecentDonation['donors'] }) => {
-  const commonClasses = 'flex items-center gap-2 font-semibold text-gray-800';
+interface SonBagislarProps {
+  teams: Team[];
+  totals: Total[];
+  recentDonations: RecentDonation[];
+}
 
-  switch (donor.identity_type) {
+// Donor kimliğini render eden yardımcı bileşen
+const DonorIdentifier = ({ donors }: { donors: RecentDonation['donors'] }) => {
+  const commonClasses = 'flex items-center gap-2 font-semibold text-gray-800';
+  
+  // İlk donor'ı al (çünkü donors bir array)
+  const firstDonor = donors[0];
+  if (!firstDonor) {
+    return (
+      <div className={commonClasses}>
+        <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-gray-400" />
+        <span>Anonim</span>
+      </div>
+    );
+  }
+
+  switch (firstDonor.identity_type) {
     case 'instagram':
       return (
         <a
-          href={`https://instagram.com/${donor.display_name}`}
+          href={`https://instagram.com/${firstDonor.display_name.replace('@', '')}`}
           target="_blank"
           rel="noopener noreferrer"
           className={`${commonClasses} text-pink-600 hover:underline`}
         >
           <FontAwesomeIcon icon={faInstagram} className="w-4 h-4" />
-          <span>@{donor.display_name}</span>
+          <span>@{firstDonor.display_name.replace('@', '')}</span>
         </a>
       );
     case 'twitter':
       return (
         <a
-          href={`https://twitter.com/${donor.display_name}`}
+          href={`https://twitter.com/${firstDonor.display_name.replace('@', '')}`}
           target="_blank"
           rel="noopener noreferrer"
           className={`${commonClasses} text-sky-500 hover:underline`}
         >
           <FontAwesomeIcon icon={faTwitter} className="w-4 h-4" />
-          <span>@{donor.display_name}</span>
+          <span>@{firstDonor.display_name.replace('@', '')}</span>
         </a>
       );
-    default: // 'name'
+    case 'name':
+    default:
       return (
         <div className={commonClasses}>
           <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-gray-400" />
-          <span>{donor.display_name}</span>
+          <span>{firstDonor.display_name}</span>
         </div>
       );
   }
@@ -77,7 +95,9 @@ export default function SonBagislar({
     let filtered = [...recentDonations];
 
     if (selectedTeam !== 'all') {
-      filtered = filtered.filter((d) => d.teams.name === selectedTeam);
+      filtered = filtered.filter((d) => 
+        d.teams.some(team => team.name === selectedTeam)
+      );
     }
 
     if (filter === 'most') {
@@ -118,13 +138,21 @@ export default function SonBagislar({
                   icon={faMedal}
                   className={`w-6 h-6 ${getMedalColor(index)}`}
                 />
-                <Image
-                  src={t.logo_url}
-                  alt={t.name}
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                />
+                {t.logo_url ? (
+                  <Image
+                    src={t.logo_url}
+                    alt={`${t.name} logosu`}
+                    width={40}
+                    height={40}
+                    className="object-contain"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold text-gray-500">
+                      {t.name?.charAt(0) || '?'}
+                    </span>
+                  </div>
+                )}
                 <p className="text-lg font-bold text-gray-700">{t.name}</p>
               </div>
               <p className="text-4xl font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">
@@ -193,45 +221,59 @@ export default function SonBagislar({
         </div>
 
         <div className="space-y-3">
-          {visibleDonations.map((d, i) => (
-            <div
-              key={i}
-              className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between hover:shadow-lg transition-shadow"
-            >
-              <div className="flex items-center space-x-4">
-                <Image
-                  src={d.teams.logo_url}
-                  alt={d.teams.name}
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                />
-                <div>
-                  <DonorIdentifier donor={d.donors} />
-                  <p className="text-sm text-gray-500 mt-1">
-                    {new Date(d.created_at).toLocaleDateString('tr-TR', {
-                      day: '2-digit',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
+          {visibleDonations.map((d, i) => {
+            // İlk takımı al (teams array olduğu için)
+            const firstTeam = d.teams[0];
+            if (!firstTeam) return null;
+
+            return (
+              <div
+                key={i}
+                className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center space-x-4">
+                  {firstTeam.logo_url ? (
+                    <Image
+                      src={firstTeam.logo_url}
+                      alt={`${firstTeam.name} logosu`}
+                      width={40}
+                      height={40}
+                      className="object-contain"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold text-gray-500">
+                        {firstTeam.name?.charAt(0) || '?'}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <DonorIdentifier donors={d.donors} />
+                    <p className="text-sm text-gray-500 mt-1">
+                      {new Date(d.created_at).toLocaleDateString('tr-TR', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p
+                    className={`font-bold text-lg rounded-full px-3 py-1 ${
+                      d.type === 'jersey'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}
+                  >
+                    {d.type === 'jersey'
+                      ? `${d.quantity} Forma`
+                      : `${d.amount_tl} TL`}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
-                <p
-                  className={`font-bold text-lg rounded-full px-3 py-1 ${
-                    d.type === 'jersey'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-blue-100 text-blue-700'
-                  }`}
-                >
-                  {d.type === 'jersey'
-                    ? `${d.quantity} Forma`
-                    : `${d.amount_tl} TL`}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* YENİ: "Daha Fazla Göster" Butonu */}
