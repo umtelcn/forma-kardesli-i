@@ -19,9 +19,7 @@ export const teamStyles = {
     borderColor: 'border-gray-900',
     buttonBg: 'bg-black',
     buttonHoverBg: 'hover:bg-gray-800',
-    // DÜZELTME: Siyah arka plan üzerinde görünür olması için
-    // buton metni ve ikon rengi 'beyaz' olarak ayarlandı.
-    buttonText: 'text-white',
+    buttonText: 'text-white', // Siyah arka planda görünürlük
     gradientFrom: 'from-gray-100',
   },
 };
@@ -29,7 +27,7 @@ export const teamStyles = {
 export const faqData: FAQ[] = [
   {
     q: 'Askıda Forma nedir?',
-    a: 'Askıda Forma, futbol tutkusunu bir iyilik köprüsüne dönüştüren, ihtiyaç sahibi çocuklarımıza tuttukları takımların formalarını ulaştırmak amacıyla kurulmuş bir sosyal sorumluluk platformudur.',
+    a: 'Askıda Forma, futbol tutkusunu bir iyilik köprüsüne dönüştüren, ihtiyaç sahibi çocuklarımıza tuttukları takımların formalarını ulaştırmak amacıyla kurulmuş bir sosyal sorumluluk platformudur. Taraftarlar, forma alarak hem kendi takımlarına destek olur hem de imkânı olmayan minik taraftarlara lisanslı forma hediye eder.',
   },
   {
     q: 'Askıda Forma resmi bir kuruluş mu?',
@@ -37,6 +35,6 @@ export const faqData: FAQ[] = [
   },
   {
     q: 'Formalar nereden temin ediliyor?',
-    a: 'Çocuklarımıza en kalitelisini ulaştırma hassasiyetiyle, tüm formalar doğrudan kulüplerin resmi mağazalarından (GSStore, Fenerium, Kartal Yuvası vb.) temin edilmektedir. Bağışınızla çocuklarımıza hediye edilen <strong>her forma orijinal ve lisanslıdır.</strong>',
+    a: 'Çocuklarımıza en kalitelisini ulaştırma hassasiyetiyle, tüm formalar doğrudan kulüplerin resmi mağazalarından (GSStore, Fenerium, Kartal Yuvası vb.) temin edilmektedir. Bağışınızla çocuklarımıza hediye edilen <strong>her forma orijinal, lisanslı ve kulüplere doğrudan katkı sağlayan</strong> ürünlerdir.',
   },
 ];
