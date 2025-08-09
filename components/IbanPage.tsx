@@ -146,9 +146,8 @@ export default function IbanPage({
                 />
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">Bilgilendirme</p>
-                  {/* DÜZELTME: Tırnak işaretleri &quot; ile değiştirildi */}
                   <p>
-                    Havale/EFT işleminizde alıcı adı kısmına &quot;Çocuklar Üşümesin&quot;
+                    Havale/EFT işleminizde alıcı adı kısmına {'"Çocuklar Üşümesin"'}
                     yazmanız yeterlidir. Açıklama kısmına bağış yaptığınız takım
                     adını belirtebilirsiniz.
                   </p>
