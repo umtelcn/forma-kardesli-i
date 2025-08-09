@@ -4,13 +4,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCheckCircle,
-  faCopy,
-  faCheck,
-  faCircleInfo,
-  faArrowLeft,
-} from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle, faCopy, faCheck, faCircleInfo, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Donation } from '../lib/types';
 
 interface IbanPageProps {
@@ -19,22 +13,35 @@ interface IbanPageProps {
   onContinue: () => void;
 }
 
-export default function IbanPage({
-  donation,
-  onBack,
-  onContinue,
-}: IbanPageProps) {
-  const [isAlıcıCopied, setIsAlıcıCopied] = useState(false);
+export default function IbanPage({ donation, onBack, onContinue }: IbanPageProps) {
+  const [isAliciCopied, setIsAliciCopied] = useState(false);
   const [isIbanCopied, setIsIbanCopied] = useState(false);
 
   const aliciAdi = 'Çocuklar Üşümesin Yardımlaşma ve Dayanışma Derneği';
-  const iban = 'TR36 0001 0011 5098 1058 3050 01';
+  const ibanDisplay = 'TR36 0001 0011 5098 1058 3050 01';
+  const ibanRaw = ibanDisplay.replace(/\s+/g, '');
+  const productImg = donation.imageUrl || '/placeholder-jersey.png';
 
-  const handleCopy = (textToCopy: string, type: 'alici' | 'iban') => {
-    navigator.clipboard.writeText(textToCopy);
+  const copySafe = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return true;
+    }
+  };
+
+  const handleCopy = async (textToCopy: string, type: 'alici' | 'iban') => {
+    await copySafe(textToCopy);
     if (type === 'alici') {
-      setIsAlıcıCopied(true);
-      setTimeout(() => setIsAlıcıCopied(false), 2000);
+      setIsAliciCopied(true);
+      setTimeout(() => setIsAliciCopied(false), 2000);
     } else {
       setIsIbanCopied(true);
       setTimeout(() => setIsIbanCopied(false), 2000);
@@ -47,9 +54,7 @@ export default function IbanPage({
         {/* Header */}
         <div className="text-center mb-8">
           <div className="text-sm text-gray-500 mb-2">Adım 1 / 3</div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Banka Bilgileri
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">Banka Bilgileri</h1>
         </div>
 
         {/* Main Content Card */}
@@ -58,13 +63,7 @@ export default function IbanPage({
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center justify-center">
-                <Image
-                  src={donation.imageUrl || ''}
-                  alt={donation.teamName || ''}
-                  width={48}
-                  height={48}
-                  className="object-contain w-full h-full"
-                />
+                <Image src={productImg} alt={donation.teamName || 'Ürün'} width={48} height={48} className="object-contain w-full h-full" />
               </div>
               <div className="flex-1">
                 <p className="text-gray-700 text-sm mb-1">
@@ -83,55 +82,37 @@ export default function IbanPage({
           <div className="p-6 space-y-6">
             {/* Recipient */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Alıcı Adı
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Alıcı Adı</label>
               <div className="relative">
                 <div className="bg-gray-50 border border-gray-300 rounded-md p-4 pr-28">
-                  <p className="text-gray-900 text-sm font-medium truncate">
-                    {aliciAdi}
-                  </p>
+                  <p className="text-gray-900 text-sm font-medium truncate">{aliciAdi}</p>
                 </div>
                 <button
                   onClick={() => handleCopy(aliciAdi, 'alici')}
                   className={`absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                    isAlıcıCopied
-                      ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                      : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                    isAliciCopied ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  <FontAwesomeIcon
-                    icon={isAlıcıCopied ? faCheck : faCopy}
-                    className="w-3 h-3 mr-1.5"
-                  />
-                  {isAlıcıCopied ? 'Kopyalandı' : 'Kopyala'}
+                  <FontAwesomeIcon icon={isAliciCopied ? faCheck : faCopy} className="w-3 h-3 mr-1.5" />
+                  {isAliciCopied ? 'Kopyalandı' : 'Kopyala'}
                 </button>
               </div>
             </div>
 
             {/* IBAN */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                IBAN Numarası
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">IBAN Numarası</label>
               <div className="relative">
                 <div className="bg-gray-50 border border-gray-300 rounded-md p-4 pr-28">
-                  <p className="font-mono text-gray-900 text-sm font-semibold">
-                    {iban}
-                  </p>
+                  <p className="font-mono text-gray-900 text-sm font-semibold">{ibanDisplay}</p>
                 </div>
                 <button
-                  onClick={() => handleCopy(iban, 'iban')}
+                  onClick={() => handleCopy(ibanRaw, 'iban')}
                   className={`absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                    isIbanCopied
-                      ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                      : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                    isIbanCopied ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  <FontAwesomeIcon
-                    icon={isIbanCopied ? faCheck : faCopy}
-                    className="w-3 h-3 mr-1.5"
-                  />
+                  <FontAwesomeIcon icon={isIbanCopied ? faCheck : faCopy} className="w-3 h-3 mr-1.5" />
                   {isIbanCopied ? 'Kopyalandı' : 'Kopyala'}
                 </button>
               </div>
@@ -139,20 +120,19 @@ export default function IbanPage({
 
             {/* Information Note */}
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-              <div className="flex gap-3">
-                <FontAwesomeIcon
-                  icon={faCircleInfo}
-                  className="text-blue-600 w-5 h-5 mt-0.5 flex-shrink-0"
-                />
-                <div className="text-sm text-green-800">
+              <div className="flex gap-3 text-blue-800">
+                <FontAwesomeIcon icon={faCircleInfo} className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div className="text-sm">
                   <p className="font-medium mb-1">Bilgilendirme</p>
-                  <p>
-                    Alıcı adı kısmına kısaca {'"Çocuklar Üşümesin"'}
-                    yazmanız yeterlidir. 
-                  </p>
+                  <p>Alıcı adına kısaca “Çocuklar Üşümesin” yazmanız yeterlidir.</p>
                 </div>
               </div>
             </div>
+
+            {/* SR-only live region for copy feedback */}
+            <span className="sr-only" role="status" aria-live="polite">
+              {isAliciCopied ? 'Alıcı adı kopyalandı' : isIbanCopied ? 'IBAN kopyalandı' : ''}
+            </span>
           </div>
 
           {/* Actions */}
