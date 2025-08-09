@@ -1,10 +1,11 @@
 // components/Header.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShirt } from '@fortawesome/free-solid-svg-icons';
+import { faInstagram } from '@fortawesome/free-brands-svg-icons';
 
 interface HeaderProps {
   setCurrentPage: (page: string) => void;
@@ -15,18 +16,17 @@ export default function Header({ setCurrentPage, setInitialTab }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const headerHeight = 'h-20';
+  const headerHeight = 'h-16 sm:h-20';
 
-  const handleNavClick = (page: string, tab: string) => {
-    setCurrentPage(page);
-    setInitialTab(tab);
+  const goHome = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCurrentPage('main');
+    setInitialTab('donate');
   };
 
   return (
@@ -34,58 +34,56 @@ export default function Header({ setCurrentPage, setInitialTab }: HeaderProps) {
       <div className={headerHeight} />
 
       <header
-        className={`fixed top-0 left-0 right-0 z-30 transition-all duration-500 ${headerHeight} ${
-          isScrolled
-            ? 'bg-white/90 shadow-2xl backdrop-blur-xl border-b border-white/20'
-            : 'bg-transparent'
-        }`}
+        className={[
+          'fixed inset-x-0 top-0 z-30',
+          'border-b transition-all duration-300',
+          'bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80',
+          isScrolled ? 'shadow-sm border-gray-200' : 'border-transparent',
+          headerHeight,
+        ].join(' ')}
+        role="banner"
       >
-        <nav className="container mx-auto flex h-full items-center justify-center px-6">
-          {/* Logo Bölümü */}
+        <nav
+          className="container mx-auto flex h-full items-center justify-between gap-4 px-4 sm:px-6"
+          aria-label="Primary"
+        >
+          {/* Logo + Marka */}
           <Link
             href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavClick('main', 'donate');
-            }}
-            className="flex items-center gap-4 group"
+            onClick={goHome}
+            className="group flex items-center gap-3"
+            aria-label="Askıda Forma ana sayfa"
           >
-            <div className="relative">
-              {/* Glow Effect */}
-              <div className="absolute -inset-2 bg-gradient-to-br from-emerald-400/30 to-emerald-600/30 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-
-              {/* Ana Logo Container */}
-              <div className="relative bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 p-3 rounded-2xl shadow-lg group-hover:shadow-emerald-500/25 group-hover:shadow-xl transition-all duration-500 group-hover:scale-110">
-                <FontAwesomeIcon
-                  icon={faShirt}
-                  className="h-6 w-6 text-white drop-shadow-sm"
-                />
-              </div>
-
-              {/* Pulse Ring */}
-              <div className="absolute inset-0 rounded-2xl border-2 border-emerald-400/50 opacity-0 group-hover:opacity-100 animate-ping"></div>
+            {/* Yuvarlak çerçeve içinde forma ikonu */}
+            <div className="relative flex items-center justify-center w-12 h-12 rounded-full border-2 border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm group-hover:scale-105 transition-transform duration-300">
+              <FontAwesomeIcon icon={faShirt} className="h-6 w-6 text-emerald-600" />
             </div>
 
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent group-hover:from-emerald-600 group-hover:to-emerald-800 transition-all duration-500">
-                Forma Kardeşliği
+            {/* Marka adı + slogan */}
+            <div className="flex flex-col leading-tight">
+              <span className="text-lg sm:text-xl font-semibold text-slate-900 tracking-[-0.01em]">
+                Askıda Forma
               </span>
-              <span className="text-xs text-gray-500 group-hover:text-emerald-600 transition-colors duration-500 font-medium tracking-wide">
-                Çocuklara umut, forma ile mutluluk
+              <span className="text-xs sm:text-sm text-emerald-600 font-medium italic">
+                “Bir forma, bir umut, bin gülümseme”
               </span>
             </div>
           </Link>
 
-          {/* Boş alan - sadece logo ve slogan */}
-          <div></div>
+          {/* Instagram ikonu */}
+          <div className="flex items-center gap-2">
+            <button
+              aria-label="Instagram"
+              className="p-2 rounded-full border border-slate-200 bg-white text-pink-500 hover:text-pink-600 hover:border-pink-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400/70"
+              // TODO: href ekle
+            >
+              <FontAwesomeIcon icon={faInstagram} className="h-5 w-5" />
+            </button>
+          </div>
         </nav>
 
-        {/* Decorative Bottom Border */}
-        <div
-          className={`h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent transition-opacity duration-500 ${
-            isScrolled ? 'opacity-100' : 'opacity-0'
-          }`}
-        ></div>
+        {/* Alt vurgu çizgisi */}
+        <div className="h-px bg-gradient-to-r from-transparent via-emerald-500/15 to-transparent" />
       </header>
     </>
   );
