@@ -144,7 +144,7 @@ export default function IbanPage({
                   icon={faCircleInfo}
                   className="text-blue-600 w-5 h-5 mt-0.5 flex-shrink-0"
                 />
-                <div className="text-sm text-blue-800">
+                <div className="text-sm text-green-800">
                   <p className="font-medium mb-1">Bilgilendirme</p>
                   <p>
                     Alıcı adı kısmına kısaca {'"Çocuklar Üşümesin"'}
