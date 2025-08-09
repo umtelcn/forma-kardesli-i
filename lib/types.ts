@@ -3,7 +3,7 @@
 export type Team = {
   id: number;
   name: string;
-  logo_url: string;
+  logo_url: string | null;
   primary_color: string | null;
   secondary_color: string | null;
   created_at?: string;
@@ -13,10 +13,10 @@ export type Team = {
 export type Product = {
   id: number;
   team_id: number;
-  image_url: string;
+  image_url: string | null;
   price: number;
-  description: string;
-  age_range: string;
+  description: string | null;
+  age_range: string | null;
   created_at?: string;
 };
 
@@ -33,13 +33,13 @@ export type Donation = {
   teamName: string;
   quantity: number | null;
   total: number;
-  imageUrl?: string;
+  imageUrl?: string | null;
 };
 
 // Takımların toplam forma bağışlarını gösteren liderlik tablosu için tip.
 export type Total = {
   name: string;
-  logo_url: string;
+  logo_url: string | null;
   total_jerseys: number;
 };
 
@@ -51,7 +51,7 @@ export type RecentDonation = {
   amount_tl: number;
   teams: {
     name: string;
-    logo_url: string;
+    logo_url: string | null;
   }[]; // Dizi olarak tanımlandı, çünkü Supabase sorgusu birden fazla takım döndürebilir
   donors: {
     display_name: string;
