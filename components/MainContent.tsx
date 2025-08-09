@@ -7,7 +7,6 @@ import {
   faGift,
   faListCheck,
   faImages,
-  faChartLine,
 } from '@fortawesome/free-solid-svg-icons';
 import FormaKartlar from './FormaKartlar';
 import SonBagislar from './SonBagislar';
@@ -53,7 +52,30 @@ export default function MainContent({
       setTotals(totalsRes.data || []);
 
       if (donationsRes.error) throw donationsRes.error;
-      setRecentDonations(donationsRes.data || []);
+
+      // Transform the data to match RecentDonation interface
+      const formattedDonations: RecentDonation[] = (donationsRes.data || []).map(
+        (donation: any) => ({
+          created_at: donation.created_at || '',
+          type: donation.type || '',
+          quantity: donation.quantity || 0,
+          amount_tl: donation.amount_tl || 0,
+          teams: Array.isArray(donation.teams)
+            ? donation.teams.map((team: any) => ({
+                name: team.name || '',
+                logo_url: team.logo_url || '',
+              }))
+            : [],
+          donors: Array.isArray(donation.donors)
+            ? donation.donors.map((donor: any) => ({
+                display_name: donor.display_name || '',
+                identity_type: donor.identity_type || '',
+              }))
+            : [],
+        })
+      );
+
+      setRecentDonations(formattedDonations);
     } catch (error) {
       console.error('Veri yüklenirken bir hata oluştu:', error);
     } finally {

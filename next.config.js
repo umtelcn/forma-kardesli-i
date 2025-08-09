@@ -1,14 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ESLint hatalarını build sırasında yoksay
+  // ESLint ayarları
   eslint: {
-    ignoreDuringBuilds: true,
+    // Build sırasında ESLint hatalarını yoksay
+    ignoreDuringBuilds: true, // Önceki build log'larında ESLint hataları vardı, bu yüzden açık bırakıyoruz
   },
-  // TypeScript hatalarını build sırasında yoksay (isteğe bağlı)
+  // TypeScript ayarları
   typescript: {
-    ignoreBuildErrors: false, // true yaparsanız TypeScript hatalarını da yoksayar
+    // Build sırasında TypeScript hatalarını yoksay
+    ignoreBuildErrors: false, // Production'da hataları yakalamak için false tutuyoruz
   },
-  // Image konfigürasyonu
+  // Image optimizasyonu
   images: {
     remotePatterns: [
       {
@@ -27,12 +29,18 @@ const nextConfig = {
   },
   // Performans optimizasyonları
   experimental: {
-    optimizeCss: true,
+    optimizeCss: true, // CSS optimizasyonunu koruyoruz
   },
-  // Webpack konfigürasyonu (Supabase uyarılarını gizle)
+  // Webpack konfigürasyonu
   webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Supabase WebSocket uyarılarını gizle
+    if (isServer) {
+      // Supabase Realtime için WebSocket bağımlılıklarını dışa aktar
+      config.externals.push({
+        bufferutil: 'commonjs bufferutil',
+        'utf-8-validate': 'commonjs utf-8-validate',
+      });
+    } else {
+      // Client-side için fallback ayarları
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,

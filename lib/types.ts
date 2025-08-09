@@ -1,5 +1,3 @@
-// lib/types.ts
-
 // Takımların temel bilgilerini içeren tip.
 // Artık fiyat ve forma görseli burada değil, 'Product' tipinde.
 export type Team = {
@@ -54,11 +52,11 @@ export type RecentDonation = {
   teams: {
     name: string;
     logo_url: string;
-  };
+  }[]; // Dizi olarak tanımlandı, çünkü Supabase sorgusu birden fazla takım döndürebilir
   donors: {
     display_name: string;
     identity_type: 'name' | 'instagram' | 'twitter';
-  };
+  }[];
 };
 
 // Sıkça Sorulan Sorular bölümü için tip.
