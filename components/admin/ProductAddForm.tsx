@@ -32,36 +32,18 @@ const FileInputWithPreview = ({ onFileChange, resetKey }: any) => {
 
   return (
     <div key={resetKey}>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        Forma Görseli
-      </label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Forma Görseli</label>
       <div className="flex items-center gap-4">
         <div className="w-16 h-16 bg-gray-100 rounded-md flex items-center justify-center border">
           {preview ? (
-            <Image
-              src={preview}
-              alt="Forma Preview"
-              width={64}
-              height={64}
-              className="object-contain h-full w-full rounded-md"
-            />
+            <Image src={preview} alt="Forma Preview" width={64} height={64} className="object-contain h-full w-full rounded-md" />
           ) : (
             <span className="text-xs text-gray-400">Önizleme</span>
           )}
         </div>
-        <label
-          htmlFor="image-upload"
-          className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
+        <label htmlFor="image-upload" className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
           <span>Görsel Seç</span>
-          <input
-            id="image-upload"
-            name="image-upload"
-            type="file"
-            className="sr-only"
-            onChange={handleFileChange}
-            accept="image/*"
-          />
+          <input id="image-upload" name="image-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
         </label>
       </div>
     </div>
@@ -76,17 +58,15 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
   const [price, setPrice] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<{
-    type: 'success' | 'error';
-    text: string;
-  } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [formResetKey, setFormResetKey] = useState(Date.now());
 
   useEffect(() => {
     const fetchTeams = async () => {
+      // DÜZELTME: 'teams' tablosundan tüm sütunları (*) çekiyoruz.
       const { data } = await supabase
         .from('teams')
-        .select('id, name')
+        .select('*')
         .order('name');
       setTeams(data || []);
     };
@@ -102,8 +82,7 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
     setFormResetKey(Date.now());
   };
 
-  const sanitizeFilename = (name: string) =>
-    name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
+  const sanitizeFilename = (name: string) => name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,21 +94,13 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
     setMessage(null);
 
     try {
-      // 1. Forma görselini Supabase Storage'a yükle
       const sanitizedImageName = sanitizeFilename(imageFile.name);
       const imageFileName = `public/${Date.now()}-${sanitizedImageName}`;
-      const { error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(imageFileName, imageFile);
-      if (uploadError)
-        throw new Error(`Forma görseli yüklenemedi: ${uploadError.message}`);
+      const { error: uploadError } = await supabase.storage.from('images').upload(imageFileName, imageFile);
+      if (uploadError) throw new Error(`Forma görseli yüklenemedi: ${uploadError.message}`);
+      
+      const { data: urlData } = supabase.storage.from('images').getPublicUrl(imageFileName);
 
-      // 2. Yüklenen dosyanın genel URL'ini al
-      const { data: urlData } = supabase.storage
-        .from('images')
-        .getPublicUrl(imageFileName);
-
-      // 3. Yeni formayı (ürünü) veritabanına kaydet
       const { error: insertError } = await supabase.from('products').insert({
         team_id: parseInt(selectedTeamId, 10),
         description: description,
@@ -137,17 +108,12 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
         price: parseFloat(price),
         image_url: urlData.publicUrl,
       });
-      if (insertError)
-        throw new Error(`Veritabanına kaydedilemedi: ${insertError.message}`);
+      if (insertError) throw new Error(`Veritabanına kaydedilemedi: ${insertError.message}`);
 
-      const selectedTeam = teams.find(
-        (t) => t.id.toString() === selectedTeamId
-      );
-      setMessage({
-        type: 'success',
-        text: `"${selectedTeam?.name}" takımı için yeni forma başarıyla eklendi!`,
-      });
+      const selectedTeam = teams.find(t => t.id.toString() === selectedTeamId);
+      setMessage({ type: 'success', text: `"${selectedTeam?.name}" takımı için yeni forma başarıyla eklendi!` });
       resetForm();
+
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message });
     } finally {
@@ -157,10 +123,7 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
 
   return (
     <div className="bg-white p-6 md:p-8 rounded-2xl shadow-xl animate-fadeIn">
-      <button
-        onClick={onBack}
-        className="text-sm text-gray-600 hover:text-emerald-600 font-semibold mb-6 flex items-center"
-      >
+      <button onClick={onBack} className="text-sm text-gray-600 hover:text-emerald-600 font-semibold mb-6 flex items-center">
         <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
         Geri Dön
       </button>
@@ -169,12 +132,7 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
       </h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label
-            htmlFor="team"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Takım Seç
-          </label>
+          <label htmlFor="team" className="block text-sm font-medium text-gray-700">Takım Seç</label>
           <select
             id="team"
             value={selectedTeamId}
@@ -182,24 +140,15 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
             className="w-full mt-1 p-2 border rounded-md shadow-sm bg-white"
             required
           >
-            <option value="" disabled>
-              Bir takım seçin...
-            </option>
-            {teams.map((team) => (
-              <option key={team.id} value={team.id}>
-                {team.name}
-              </option>
+            <option value="" disabled>Bir takım seçin...</option>
+            {teams.map(team => (
+              <option key={team.id} value={team.id}>{team.name}</option>
             ))}
           </select>
         </div>
 
         <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Ürün Açıklaması
-          </label>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Ürün Açıklaması</label>
           <input
             type="text"
             id="description"
@@ -211,13 +160,8 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
           />
         </div>
 
-        <div>
-          <label
-            htmlFor="ageRange"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Yaş Aralığı
-          </label>
+         <div>
+          <label htmlFor="ageRange" className="block text-sm font-medium text-gray-700">Yaş Aralığı</label>
           <input
             type="text"
             id="ageRange"
@@ -230,12 +174,7 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
         </div>
 
         <div>
-          <label
-            htmlFor="price"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Fiyat (TL)
-          </label>
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700">Fiyat (TL)</label>
           <input
             type="number"
             id="price"
@@ -246,35 +185,25 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
           />
         </div>
 
-        <FileInputWithPreview
-          onFileChange={setImageFile}
-          resetKey={formResetKey}
-        />
-
+        <FileInputWithPreview onFileChange={setImageFile} resetKey={formResetKey} />
+        
         <div className="pt-2">
           <button
             type="submit"
             disabled={isSaving}
             className="w-full bg-emerald-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-emerald-700 transition flex items-center justify-center disabled:opacity-50"
           >
-            <FontAwesomeIcon
-              icon={isSaving ? faSpinner : faShirt}
-              className={isSaving ? 'animate-spin mr-2' : 'mr-2'}
-            />
+            <FontAwesomeIcon icon={isSaving ? faSpinner : faShirt} className={isSaving ? 'animate-spin mr-2' : 'mr-2'} />
             {isSaving ? 'Kaydediliyor...' : 'Formayı Kaydet'}
           </button>
         </div>
         {message && (
           <div
             className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
-              message.type === 'success'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
+              message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
             }`}
           >
-            <FontAwesomeIcon
-              icon={message.type === 'success' ? faCheckCircle : faTimesCircle}
-            />
+            <FontAwesomeIcon icon={message.type === 'success' ? faCheckCircle : faTimesCircle} />
             <span>{message.text}</span>
           </div>
         )}
