@@ -1,5 +1,4 @@
 // Takımların temel bilgilerini içeren tip.
-// Artık fiyat ve forma görseli burada değil, 'Product' tipinde.
 export type Team = {
   id: number;
   name: string;
@@ -43,20 +42,42 @@ export type Total = {
   total_jerseys: number;
 };
 
+// Donor bilgileri
+export type Donor = {
+  id: number;
+  name: string;
+  surname: string;
+  email: string;
+  instagram_handle: string | null;
+  twitter_handle: string | null;
+  display_name: string | null;
+  identity_type: 'name' | 'instagram' | 'twitter' | null;
+  created_at?: string;
+};
+
 // Son bağışlar listesinde gösterilecek her bir bağışın detaylı tipi.
 export type RecentDonation = {
+  id: number;
   created_at: string;
   type: 'jersey' | 'pool';
   quantity: number | null;
   amount_tl: number;
+  // Join ile gelen team bilgisi
   teams: {
+    id: number;
     name: string;
     logo_url: string | null;
-  }[]; // Dizi olarak tanımlandı, çünkü Supabase sorgusu birden fazla takım döndürebilir
+  };
+  // Join ile gelen donor bilgisi
   donors: {
-    display_name: string;
-    identity_type: 'name' | 'instagram' | 'twitter';
-  }[];
+    id: number;
+    display_name: string | null;
+    identity_type: 'name' | 'instagram' | 'twitter' | null;
+    instagram_handle: string | null;
+    twitter_handle: string | null;
+    name: string;
+    surname: string;
+  };
 };
 
 // Sıkça Sorulan Sorular bölümü için tip.

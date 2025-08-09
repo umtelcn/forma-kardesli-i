@@ -7,24 +7,16 @@ import {
   faList,
   faUser,
   faMedal,
-  faChevronDown, // "Daha Fazla Göster" butonu için ikon
+  faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { Team, Total, RecentDonation } from '../lib/types';
 
-interface SonBagislarProps {
-  teams: Team[];
-  totals: Total[];
-  recentDonations: RecentDonation[];
-}
-
 // Donor kimliğini render eden yardımcı bileşen
-const DonorIdentifier = ({ donors }: { donors: RecentDonation['donors'] }) => {
+const DonorIdentifier = ({ donor }: { donor: RecentDonation['donors'] }) => {
   const commonClasses = 'flex items-center gap-2 font-semibold text-gray-800';
   
-  // İlk donor'ı al (çünkü donors bir array)
-  const firstDonor = donors[0];
-  if (!firstDonor) {
+  if (!donor) {
     return (
       <div className={commonClasses}>
         <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-gray-400" />
@@ -33,40 +25,57 @@ const DonorIdentifier = ({ donors }: { donors: RecentDonation['donors'] }) => {
     );
   }
 
-  switch (firstDonor.identity_type) {
+  // DÜZELTME: Gelen veriyi daha doğru işleyen mantık
+  switch (donor.identity_type) {
     case 'instagram':
+      // Eğer instagram_handle alanı doluysa onu kullan, değilse display_name'i kullan
+      const instagramHandle = donor.instagram_handle || donor.display_name;
+      if (!instagramHandle) break; // Eğer ikisi de boşsa, varsayılana düş
       return (
         <a
-          href={`https://instagram.com/${firstDonor.display_name.replace('@', '')}`}
+          href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
           target="_blank"
           rel="noopener noreferrer"
           className={`${commonClasses} text-pink-600 hover:underline`}
         >
           <FontAwesomeIcon icon={faInstagram} className="w-4 h-4" />
-          <span>@{firstDonor.display_name.replace('@', '')}</span>
+          <span>@{instagramHandle.replace('@', '')}</span>
         </a>
       );
     case 'twitter':
+      // Eğer twitter_handle alanı doluysa onu kullan, değilse display_name'i kullan
+      const twitterHandle = donor.twitter_handle || donor.display_name;
+      if (!twitterHandle) break; // Eğer ikisi de boşsa, varsayılana düş
       return (
         <a
-          href={`https://twitter.com/${firstDonor.display_name.replace('@', '')}`}
+          href={`https://twitter.com/${twitterHandle.replace('@', '')}`}
           target="_blank"
           rel="noopener noreferrer"
           className={`${commonClasses} text-sky-500 hover:underline`}
         >
           <FontAwesomeIcon icon={faTwitter} className="w-4 h-4" />
-          <span>@{firstDonor.display_name.replace('@', '')}</span>
+          <span>@{twitterHandle.replace('@', '')}</span>
         </a>
       );
     case 'name':
     default:
+      // display_name doluysa onu, değilse ad ve soyadı birleştirerek göster
+      const displayName = donor.display_name || `${donor.name || ''} ${donor.surname || ''}`.trim();
       return (
         <div className={commonClasses}>
           <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-gray-400" />
-          <span>{firstDonor.display_name}</span>
+          <span>{displayName || 'İsimsiz Kahraman'}</span>
         </div>
       );
   }
+
+  // Herhangi bir bilgi bulunamazsa gösterilecek varsayılan durum
+  return (
+    <div className={commonClasses}>
+      <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-gray-400" />
+      <span>İsimsiz Kahraman</span>
+    </div>
+  );
 };
 
 export default function SonBagislar({
@@ -76,7 +85,6 @@ export default function SonBagislar({
 }: SonBagislarProps) {
   const [filter, setFilter] = useState<'recent' | 'most'>('recent');
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
-  // YENİ: Görünen bağış sayısını tutan state
   const [visibleCount, setVisibleCount] = useState(10);
 
   const sortedTotals = [...totals].sort(
@@ -90,16 +98,14 @@ export default function SonBagislar({
     return 'hidden';
   };
 
-  // Filtrelenmiş ve sıralanmış tüm bağışları döndüren fonksiyon
   const getFullFilteredDonations = useCallback(() => {
-    let filtered = [...recentDonations];
-
-    if (selectedTeam !== 'all') {
-      filtered = filtered.filter((d) => 
-        d.teams.some(team => team.name === selectedTeam)
-      );
+    if (!recentDonations || recentDonations.length === 0) {
+      return [];
     }
-
+    let filtered = [...recentDonations];
+    if (selectedTeam !== 'all') {
+      filtered = filtered.filter((d) => d.teams?.name === selectedTeam);
+    }
     if (filter === 'most') {
       filtered.sort((a, b) => b.amount_tl - a.amount_tl);
     } else {
@@ -115,55 +121,58 @@ export default function SonBagislar({
   const visibleDonations = allFilteredDonations.slice(0, visibleCount);
 
   const handleLoadMore = () => {
-    // Her tıklandığında 10 daha göster
     setVisibleCount((prevCount) => prevCount + 10);
   };
 
   return (
     <div className="animate-fadeIn space-y-12">
-      {/* Toplam forma bağışları */}
       <div>
         <h3 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
           <FontAwesomeIcon icon={faTrophy} className="text-amber-500 w-7 h-7" />
           Takımların Forma Katkıları
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {sortedTotals.map((t, index) => (
-            <div
-              key={t.name}
-              className="bg-white p-4 rounded-xl shadow-md flex items-center justify-between transition-transform hover:scale-105"
-            >
-              <div className="flex items-center space-x-3">
-                <FontAwesomeIcon
-                  icon={faMedal}
-                  className={`w-6 h-6 ${getMedalColor(index)}`}
-                />
-                {t.logo_url ? (
-                  <Image
-                    src={t.logo_url}
-                    alt={`${t.name} logosu`}
-                    width={40}
-                    height={40}
-                    className="object-contain"
+        {sortedTotals.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {sortedTotals.map((t, index) => (
+              <div
+                key={t.name}
+                className="bg-white p-4 rounded-xl shadow-md flex items-center justify-between transition-transform hover:scale-105"
+              >
+                <div className="flex items-center space-x-3">
+                  <FontAwesomeIcon
+                    icon={faMedal}
+                    className={`w-6 h-6 ${getMedalColor(index)}`}
                   />
-                ) : (
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-gray-500">
-                      {t.name?.charAt(0) || '?'}
-                    </span>
-                  </div>
-                )}
-                <p className="text-lg font-bold text-gray-700">{t.name}</p>
+                  {t.logo_url ? (
+                    <Image
+                      src={t.logo_url}
+                      alt={`${t.name} logosu`}
+                      width={40}
+                      height={40}
+                      className="object-contain"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold text-gray-500">
+                        {t.name?.charAt(0) || '?'}
+                      </span>
+                    </div>
+                  )}
+                  <p className="text-lg font-bold text-gray-700">{t.name}</p>
+                </div>
+                <p className="text-4xl font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">
+                  {t.total_jerseys || 0}
+                </p>
               </div>
-              <p className="text-4xl font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">
-                {t.total_jerseys || 0}
-              </p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <p>Henüz takım katkısı bulunmuyor.</p>
+          </div>
+        )}
       </div>
 
-      {/* Son Bağışlar Bölümü */}
       <div>
         <div className="md:flex justify-between items-center mb-6">
           <h3 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3 mb-4 md:mb-0">
@@ -178,7 +187,7 @@ export default function SonBagislar({
               value={selectedTeam}
               onChange={(e) => {
                 setSelectedTeam(e.target.value);
-                setVisibleCount(10); // Filtre değiştiğinde sayacı sıfırla
+                setVisibleCount(10);
               }}
               className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-500"
             >
@@ -193,7 +202,7 @@ export default function SonBagislar({
               <button
                 onClick={() => {
                   setFilter('recent');
-                  setVisibleCount(10); // Filtre değiştiğinde sayacı sıfırla
+                  setVisibleCount(10);
                 }}
                 className={`px-3 py-1 rounded-md text-sm font-semibold transition ${
                   filter === 'recent'
@@ -206,7 +215,7 @@ export default function SonBagislar({
               <button
                 onClick={() => {
                   setFilter('most');
-                  setVisibleCount(10); // Filtre değiştiğinde sayacı sıfırla
+                  setVisibleCount(10);
                 }}
                 className={`px-3 py-1 rounded-md text-sm font-semibold transition ${
                   filter === 'most'
@@ -220,22 +229,18 @@ export default function SonBagislar({
           </div>
         </div>
 
-        <div className="space-y-3">
-          {visibleDonations.map((d, i) => {
-            // İlk takımı al (teams array olduğu için)
-            const firstTeam = d.teams[0];
-            if (!firstTeam) return null;
-
-            return (
+        {visibleDonations.length > 0 ? (
+          <div className="space-y-3">
+            {visibleDonations.map((d, i) => (
               <div
-                key={i}
+                key={i} // Benzersiz bir ID kullanmak daha iyidir, örneğin d.id
                 className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-center space-x-4">
-                  {firstTeam.logo_url ? (
+                  {d.teams?.logo_url ? (
                     <Image
-                      src={firstTeam.logo_url}
-                      alt={`${firstTeam.name} logosu`}
+                      src={d.teams.logo_url}
+                      alt={`${d.teams.name} logosu`}
                       width={40}
                       height={40}
                       className="object-contain"
@@ -243,18 +248,18 @@ export default function SonBagislar({
                   ) : (
                     <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                       <span className="text-sm font-bold text-gray-500">
-                        {firstTeam.name?.charAt(0) || '?'}
+                        {d.teams?.name?.charAt(0) || '?'}
                       </span>
                     </div>
                   )}
                   <div>
-                    <DonorIdentifier donors={d.donors} />
+                    <DonorIdentifier donor={d.donors} />
                     <p className="text-sm text-gray-500 mt-1">
                       {new Date(d.created_at).toLocaleDateString('tr-TR', {
                         day: '2-digit',
                         month: 'long',
                         year: 'numeric',
-                      })}
+                      })} • {d.teams?.name}
                     </p>
                   </div>
                 </div>
@@ -267,16 +272,26 @@ export default function SonBagislar({
                     }`}
                   >
                     {d.type === 'jersey'
-                      ? `${d.quantity} Forma`
+                      ? `${d.quantity || 0} Forma`
                       : `${d.amount_tl} TL`}
                   </p>
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            <FontAwesomeIcon icon={faList} className="w-12 h-12 mb-4 text-gray-300" />
+            <p className="text-lg font-medium">Henüz bağış bulunmuyor</p>
+            <p className="text-sm mt-2">
+              {selectedTeam !== 'all' 
+                ? `${selectedTeam} takımı için bağış bulunamadı.`
+                : 'İlk bağışçı siz olun!'
+              }
+            </p>
+          </div>
+        )}
 
-        {/* YENİ: "Daha Fazla Göster" Butonu */}
         {visibleCount < allFilteredDonations.length && (
           <div className="mt-6 text-center">
             <button
