@@ -37,7 +37,7 @@ export default function PoolDonationCard({
       teamName: selectedTeam.name,
       quantity: null,
       total: amount,
-      imageUrl: selectedTeam.logo_url,
+      imageUrl: selectedTeam.logo_url || null,
     });
   };
 
@@ -61,13 +61,21 @@ export default function PoolDonationCard({
                 onClick={() => setSelectedTeamId(team.id)}
                 className="p-2 rounded-lg bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 flex flex-col items-center transition"
               >
-                <Image
-                  src={team.logo_url}
-                  alt={team.name}
-                  width={36}
-                  height={36}
-                  className="object-contain mb-1"
-                />
+                {team.logo_url ? (
+                  <Image
+                    src={team.logo_url}
+                    alt={`${team.name} logosu`}
+                    width={36}
+                    height={36}
+                    className="object-contain mb-1"
+                  />
+                ) : (
+                  <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center mb-1">
+                    <span className="text-sm font-bold text-gray-500">
+                      {team.name?.charAt(0) || '?'}
+                    </span>
+                  </div>
+                )}
                 <span className="text-xs font-medium text-gray-700 text-center leading-tight">
                   {team.name}
                 </span>
@@ -86,18 +94,28 @@ export default function PoolDonationCard({
             Değiştir
           </button>
 
-          <div className="flex items-center gap-2 mb-3">
-            <Image
-              src={selectedTeam.logo_url}
-              alt={selectedTeam.name}
-              width={36}
-              height={36}
-              className="object-contain"
-            />
-            <p className="font-medium text-gray-700 text-sm">
-              {selectedTeam.name}
-            </p>
-          </div>
+          {selectedTeam && (
+            <div className="flex items-center gap-2 mb-3">
+              {selectedTeam.logo_url ? (
+                <Image
+                  src={selectedTeam.logo_url}
+                  alt={`${selectedTeam.name} logosu`}
+                  width={36}
+                  height={36}
+                  className="object-contain"
+                />
+              ) : (
+                <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-gray-500">
+                    {selectedTeam.name?.charAt(0) || '?'}
+                  </span>
+                </div>
+              )}
+              <p className="font-medium text-gray-700 text-sm">
+                {selectedTeam.name}
+              </p>
+            </div>
+          )}
 
           {/* Hızlı Tutarlar */}
           <div className="grid grid-cols-3 gap-2 mb-3">
@@ -128,6 +146,8 @@ export default function PoolDonationCard({
               onChange={(e) => setPoolAmount(e.target.value)}
               className="w-full text-sm text-center py-2 pl-8 border border-gray-300 rounded-md focus:ring-1 focus:ring-emerald-500"
               placeholder="Tutar Gir"
+              min="1"
+              step="1"
             />
           </div>
 
