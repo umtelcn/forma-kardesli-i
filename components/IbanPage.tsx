@@ -147,7 +147,7 @@ export default function IbanPage({
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">Bilgilendirme</p>
                   <p>
-                    Alıcı adı kısmına {'"Çocuklar Üşümesin"'}
+                    Alıcı adı kısmına kısaca {'"Çocuklar Üşümesin"'}
                     yazmanız yeterlidir. 
                   </p>
                 </div>
