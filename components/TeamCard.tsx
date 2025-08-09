@@ -59,14 +59,20 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
       {/* ÜST GÖRSEL */}
       <div className="relative w-full bg-gray-50">
         <div className="relative mx-auto w-full max-w-[520px] aspect-[16/10]">
-          <Image
-            src={product.image_url}
-            alt={product.description || `${team.name} ürünü`}
-            fill
-            className="object-contain p-4"
-            sizes="(max-width: 640px) 100vw, (max-width:1024px) 60vw, 520px"
-            priority
-          />
+          {product.image_url ? (
+            <Image
+              src={product.image_url}
+              alt={product.description || `${team.name} ürünü`}
+              fill
+              className="object-contain p-4"
+              sizes="(max-width: 640px) 100vw, (max-width:1024px) 60vw, 520px"
+              priority
+            />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full text-gray-400">
+              <span>Görsel Yükleniyor...</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -74,13 +80,21 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
       <div className="p-4 sm:p-5">
         {/* Başlık ve Logo */}
         <div className="flex items-center gap-2">
-          <Image
-            src={team.logo_url}
-            alt={`${team.name} Logosu`}
-            width={28}
-            height={28}
-            className="object-contain shrink-0"
-          />
+          {team.logo_url ? (
+            <Image
+              src={team.logo_url}
+              alt={`${team.name} logosu`}
+              width={28}
+              height={28}
+              className="object-contain shrink-0"
+            />
+          ) : (
+            <div className="w-7 h-7 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+              <span className="text-xs font-bold text-gray-500">
+                {team.name?.charAt(0) || '?'}
+              </span>
+            </div>
+          )}
           <h3 className="text-lg font-bold tracking-tight text-gray-900 truncate">
             {team.name}
           </h3>

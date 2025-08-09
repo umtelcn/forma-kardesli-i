@@ -1,14 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push({
-        bufferutil: 'commonjs bufferutil',
-        'utf-8-validate': 'commonjs utf-8-validate',
-      });
-    }
-    return config;
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'uwfoctzdrpemxfjffcqk.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+      },
+    ],
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
