@@ -13,9 +13,7 @@ import SonBagislar from './SonBagislar';
 import SssFooter from './SssFooter';
 import { Team, Donation, Total, RecentDonation } from '../lib/types';
 
-// #region Helper Functions & Components (Moved outside for better organization)
-
-// Helper function to get color styles for tabs
+// Helper: Renk stilleri
 function getColorClasses(color: string) {
   const colorMap = {
     emerald: {
@@ -37,12 +35,10 @@ function getColorClasses(color: string) {
   return colorMap[color as keyof typeof colorMap] || colorMap.emerald;
 }
 
-// Data structure for a tab
 interface TabData {
   id: string;
   label: string;
   icon: any;
-  description: string;
   color: string;
 }
 
@@ -52,7 +48,7 @@ interface TabButtonProps {
   onClick: () => void;
 }
 
-// Desktop Tab Button Component
+// Masaüstü sekme butonu
 function TabButtonDesktop({ tab, isActive, onClick }: TabButtonProps) {
   const colorClasses = getColorClasses(tab.color);
   return (
@@ -74,27 +70,18 @@ function TabButtonDesktop({ tab, isActive, onClick }: TabButtonProps) {
           }`}
         />
       </div>
-      <div className="text-left min-w-0">
-        <div
-          className={`font-semibold text-sm transition-colors duration-300 ${
-            isActive ? 'text-gray-900' : 'text-gray-600 group-hover:text-gray-800'
-          }`}
-        >
-          {tab.label}
-        </div>
-        <div
-          className={`text-xs mt-0.5 transition-colors duration-300 ${
-            isActive ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500'
-          }`}
-        >
-          {tab.description}
-        </div>
-      </div>
+      <span
+        className={`font-semibold text-sm transition-colors duration-300 ${
+          isActive ? 'text-gray-900' : 'text-gray-600 group-hover:text-gray-800'
+        }`}
+      >
+        {tab.label}
+      </span>
     </button>
   );
 }
 
-// Mobile Tab Button Component
+// Mobil sekme butonu
 function TabButtonMobile({ tab, isActive, onClick }: TabButtonProps) {
   const colorClasses = getColorClasses(tab.color);
   return (
@@ -129,41 +116,20 @@ function TabButtonMobile({ tab, isActive, onClick }: TabButtonProps) {
   );
 }
 
-// "Coming Soon" Placeholder Component
+// "Çok Yakında" alanı
 function ComingSoonSection() {
   return (
-    <div className="text-center py-16 bg-gradient-to-br from-white via-gray-50 to-purple-50/30 rounded-3xl shadow-lg border border-gray-100 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-purple-50/20 to-transparent"></div>
-      <div className="absolute top-0 left-1/4 w-72 h-72 bg-purple-200/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-200/20 rounded-full blur-3xl"></div>
-      <div className="relative z-10">
-        <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-400 to-purple-600 shadow-xl shadow-purple-500/25 mb-8">
-          <FontAwesomeIcon icon={faImages} className="text-white text-4xl drop-shadow-sm" />
-        </div>
-        <div className="space-y-4 mb-8">
-          <h3 className="text-4xl font-bold text-gray-800 tracking-tight">
-            Çok Yakında!
-          </h3>
-          <div className="w-20 h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full mx-auto"></div>
-        </div>
-        <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed mb-8">
-          Bu bölüm, bağışlarınızla formalarına kavuşan çocukların paha biçilmez
-          sevinçlerini yansıtan fotoğraf ve videolarla dolacak.
-        </p>
-        <div className="flex items-center justify-center gap-2 text-purple-600">
-          <div className="flex gap-1">
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-          </div>
-          <span className="text-sm font-medium">Hazırlanıyor</span>
-        </div>
+    <div className="text-center py-16 bg-gradient-to-br from-white via-gray-50 to-purple-50/30 rounded-3xl shadow-lg border border-gray-100">
+      <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-400 to-purple-600 shadow-xl shadow-purple-500/25 mb-8">
+        <FontAwesomeIcon icon={faImages} className="text-white text-4xl drop-shadow-sm" />
       </div>
+      <h3 className="text-4xl font-bold text-gray-800 mb-4">Çok Yakında!</h3>
+      <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+        Bu bölüm, bağışlarınızla formalarına kavuşan çocukların mutluluk anılarıyla dolacak.
+      </p>
     </div>
   );
 }
-
-// #endregion
 
 interface MainContentProps {
   onStartDonation: (d: Donation) => void;
@@ -188,26 +154,16 @@ export default function MainContent({
       const [teamsRes, totalsRes, donationsRes] = await Promise.all([
         supabase.from('teams').select('*').order('name'),
         supabase.rpc('get_team_donation_totals'),
-        supabase
-          .from('donations')
-          .select('*, teams(*), donors(*)') // Fetch all related data
+        supabase.from('donations').select('*, teams(*), donors(*)')
           .order('created_at', { ascending: false })
           .limit(50),
       ]);
 
-      if (teamsRes.error) throw teamsRes.error;
-      setTeams(teamsRes.data || []);
-
-      if (totalsRes.error) throw totalsRes.error;
-      setTotals(totalsRes.data || []);
-
-      if (donationsRes.error) throw donationsRes.error;
-      // The data from Supabase should already match the RecentDonation type if the select query is correct.
-      // No need for manual mapping.
-      setRecentDonations((donationsRes.data as RecentDonation[]) || []);
-
+      if (!teamsRes.error) setTeams(teamsRes.data || []);
+      if (!totalsRes.error) setTotals(totalsRes.data || []);
+      if (!donationsRes.error) setRecentDonations(donationsRes.data as RecentDonation[]);
     } catch (error) {
-      console.error('Veri yüklenirken bir hata oluştu:', error);
+      console.error('Veri yüklenirken hata:', error);
     } finally {
       setIsLoading(false);
     }
@@ -222,71 +178,53 @@ export default function MainContent({
   }, [initialTab]);
 
   const tabs: TabData[] = [
-    { id: 'donate', label: 'Forma Bağışla', icon: faGift, description: 'Çocuklara forma hediye edin', color: 'emerald' },
-    { id: 'donations', label: 'Bağış Listesi', icon: faListCheck, description: 'Son yapılan bağışları görüntüleyin', color: 'blue' },
-    { id: 'happiness', label: 'Mutluluk Galerisi', icon: faImages, description: 'Çocukların sevinç dolu anları', color: 'purple' },
+    { id: 'donate', label: 'Forma Bağışla', icon: faGift, color: 'emerald' },
+    { id: 'donations', label: 'Bağış Listesi', icon: faListCheck, color: 'blue' },
+    { id: 'happiness', label: 'Mutluluk Galerisi', icon: faImages, color: 'purple' },
   ];
-
-  const activeTab = tabs.find((t) => t.id === currentTab) || tabs[0];
 
   return (
     <main className="container mx-auto px-4 py-8">
-      {/* Modern Tab Navigation */}
-      <div className="mb-8">
-        {/* Desktop Tabs */}
-        <div className="hidden md:block">
-          <div className="relative bg-gray-50 p-2 rounded-2xl border border-gray-200 shadow-sm">
-            <div className="flex relative">
-              <div
-                className="absolute top-0 bottom-0 bg-white rounded-xl shadow-md border border-gray-200 transition-all duration-300 ease-out"
-                style={{
-                  left: `${tabs.findIndex((tab) => tab.id === currentTab) * (100 / tabs.length)}%`,
-                  width: `${100 / tabs.length}%`,
-                }}
+      {/* Masaüstü sekmeler */}
+      <div className="hidden md:block mb-8">
+        <div className="relative bg-gray-50 p-2 rounded-2xl border border-gray-200 shadow-sm">
+          <div className="flex relative">
+            <div
+              className="absolute top-0 bottom-0 bg-white rounded-xl shadow-md border border-gray-200 transition-all duration-300 ease-out"
+              style={{
+                left: `${tabs.findIndex((tab) => tab.id === currentTab) * (100 / tabs.length)}%`,
+                width: `${100 / tabs.length}%`,
+              }}
+            />
+            {tabs.map((tab) => (
+              <TabButtonDesktop
+                key={tab.id}
+                tab={tab}
+                isActive={currentTab === tab.id}
+                onClick={() => setCurrentTab(tab.id)}
               />
-              {tabs.map((tab) => (
-                <TabButtonDesktop
-                  key={tab.id}
-                  tab={tab}
-                  isActive={currentTab === tab.id}
-                  onClick={() => setCurrentTab(tab.id)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Tabs */}
-        <div className="md:hidden">
-          <div className="overflow-x-auto scrollbar-hide">
-            <div className="flex gap-3 px-1 pb-1" style={{ width: 'max-content' }}>
-              {tabs.map((tab) => (
-                <TabButtonMobile
-                  key={tab.id}
-                  tab={tab}
-                  isActive={currentTab === tab.id}
-                  onClick={() => setCurrentTab(tab.id)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Tab Content Header */}
-        <div className="mt-6 mb-4">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl bg-gradient-to-br ${getColorClasses(activeTab.color).gradient} shadow-sm`}>
-              <FontAwesomeIcon icon={activeTab.icon} className="text-white text-lg" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{activeTab.label}</h2>
-              <p className="text-gray-600 text-sm">{activeTab.description}</p>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Content Area */}
+      {/* Mobil sekmeler */}
+      <div className="md:hidden mb-8">
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex gap-3 px-1 pb-1" style={{ width: 'max-content' }}>
+            {tabs.map((tab) => (
+              <TabButtonMobile
+                key={tab.id}
+                tab={tab}
+                isActive={currentTab === tab.id}
+                onClick={() => setCurrentTab(tab.id)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* İçerik */}
       <div className="relative">
         {isLoading && (
           <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
@@ -297,28 +235,26 @@ export default function MainContent({
           </div>
         )}
 
-        <div className="transition-all duration-300 ease-out">
-          {currentTab === 'donate' && (
-            <div className="animate-fadeIn">
-              <FormaKartlar onStartDonation={onStartDonation} />
-              <SssFooter onAdminClick={onAdminClick} />
-            </div>
-          )}
-          {currentTab === 'donations' && (
-            <div className="animate-fadeIn">
-              <SonBagislar
-                teams={teams}
-                totals={totals}
-                recentDonations={recentDonations}
-              />
-            </div>
-          )}
-          {currentTab === 'happiness' && (
-            <div className="animate-fadeIn">
-              <ComingSoonSection />
-            </div>
-          )}
-        </div>
+        {currentTab === 'donate' && (
+          <div className="animate-fadeIn">
+            <FormaKartlar onStartDonation={onStartDonation} />
+            <SssFooter onAdminClick={onAdminClick} />
+          </div>
+        )}
+        {currentTab === 'donations' && (
+          <div className="animate-fadeIn">
+            <SonBagislar
+              teams={teams}
+              totals={totals}
+              recentDonations={recentDonations}
+            />
+          </div>
+        )}
+        {currentTab === 'happiness' && (
+          <div className="animate-fadeIn">
+            <ComingSoonSection />
+          </div>
+        )}
       </div>
     </main>
   );
