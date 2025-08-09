@@ -1,4 +1,6 @@
 // components/SonBagislar.tsx
+'use client';
+
 import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,7 +14,14 @@ import {
 import { faInstagram, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { Team, Total, RecentDonation } from '../lib/types';
 
-// Donor kimliğini render eden yardımcı bileşen
+// Bileşenin alacağı prop'ların tip tanımı
+interface SonBagislarProps {
+  teams: Team[];
+  totals: Total[];
+  recentDonations: RecentDonation[];
+}
+
+// Bağışçı kimliğini gösteren yardımcı bileşen
 const DonorIdentifier = ({ donor }: { donor: RecentDonation['donors'] }) => {
   const commonClasses = 'flex items-center gap-2 font-semibold text-gray-800';
   
@@ -25,12 +34,10 @@ const DonorIdentifier = ({ donor }: { donor: RecentDonation['donors'] }) => {
     );
   }
 
-  // DÜZELTME: Gelen veriyi daha doğru işleyen mantık
   switch (donor.identity_type) {
     case 'instagram':
-      // Eğer instagram_handle alanı doluysa onu kullan, değilse display_name'i kullan
       const instagramHandle = donor.instagram_handle || donor.display_name;
-      if (!instagramHandle) break; // Eğer ikisi de boşsa, varsayılana düş
+      if (!instagramHandle) break;
       return (
         <a
           href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
@@ -43,9 +50,8 @@ const DonorIdentifier = ({ donor }: { donor: RecentDonation['donors'] }) => {
         </a>
       );
     case 'twitter':
-      // Eğer twitter_handle alanı doluysa onu kullan, değilse display_name'i kullan
       const twitterHandle = donor.twitter_handle || donor.display_name;
-      if (!twitterHandle) break; // Eğer ikisi de boşsa, varsayılana düş
+      if (!twitterHandle) break;
       return (
         <a
           href={`https://twitter.com/${twitterHandle.replace('@', '')}`}
@@ -59,7 +65,6 @@ const DonorIdentifier = ({ donor }: { donor: RecentDonation['donors'] }) => {
       );
     case 'name':
     default:
-      // display_name doluysa onu, değilse ad ve soyadı birleştirerek göster
       const displayName = donor.display_name || `${donor.name || ''} ${donor.surname || ''}`.trim();
       return (
         <div className={commonClasses}>
@@ -92,9 +97,9 @@ export default function SonBagislar({
   );
 
   const getMedalColor = (index: number) => {
-    if (index === 0) return 'text-yellow-500';
-    if (index === 1) return 'text-gray-400';
-    if (index === 2) return 'text-orange-500';
+    if (index === 0) return 'text-yellow-500'; // Altın
+    if (index === 1) return 'text-gray-400'; // Gümüş
+    if (index === 2) return 'text-orange-500'; // Bronz
     return 'hidden';
   };
 
@@ -126,6 +131,7 @@ export default function SonBagislar({
 
   return (
     <div className="animate-fadeIn space-y-12">
+      {/* Takımların Forma Katkıları */}
       <div>
         <h3 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
           <FontAwesomeIcon icon={faTrophy} className="text-amber-500 w-7 h-7" />
@@ -173,6 +179,7 @@ export default function SonBagislar({
         )}
       </div>
 
+      {/* Son Bağışlar */}
       <div>
         <div className="md:flex justify-between items-center mb-6">
           <h3 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3 mb-4 md:mb-0">
@@ -233,7 +240,9 @@ export default function SonBagislar({
           <div className="space-y-3">
             {visibleDonations.map((d, i) => (
               <div
-                key={i} // Benzersiz bir ID kullanmak daha iyidir, örneğin d.id
+                // React'ta listeler için index yerine benzersiz bir ID kullanmak en iyi pratiktir.
+                // Veritabanından gelen d.id'yi kullanıyoruz.
+                key={(d as any).id || i}
                 className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-center space-x-4">
