@@ -179,11 +179,10 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
                 quantity,
                 total,
                 imageUrl: product.image_url,
-                // DÜZELTME: Teşekkür kartının doğru renklenmesi için
-                // bu bilgileri de gönderiyoruz.
-                teamLogo: team.logo_url,
-                primaryColor: team.primary_color,
-                secondaryColor: team.secondary_color,
+                // TypeScript hatası düzeltildi: null değerleri undefined'a çevrildi
+                teamLogo: team.logo_url || undefined,
+                primaryColor: team.primary_color || undefined,
+                secondaryColor: team.secondary_color || undefined,
               })
             }
             className="w-full mt-1 text-base font-bold py-3 rounded-xl transition-transform hover:scale-[1.015] active:scale-[0.99] shadow-sm"
