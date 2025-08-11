@@ -117,7 +117,6 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
 }
 
 const AddForm = () => {
-  // ... Bu bileşenin içeriği değişmedi, aynı kalabilir ...
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [description, setDescription] = useState('');
@@ -203,7 +202,7 @@ const AddForm = () => {
       </div>
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Ürün Açıklaması</label>
-        <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded-md shadow-sm focus:outline-ne focus:ring-2 focus:ring-[var(--ring-color)] focus:border-[var(--ring-color)]" placeholder="Örn: 2024-2025 Sezonu İç Saha Forması" required />
+        <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-[var(--ring-color)]" placeholder="Örn: 2024-2025 Sezonu İç Saha Forması" required />
       </div>
       <div>
         <label htmlFor="ageRange" className="block text-sm font-medium text-gray-700 mb-1">Yaş Aralığı</label>
@@ -229,7 +228,6 @@ const AddForm = () => {
     </form>
   );
 };
-
 
 const EditList = () => {
   const [products, setProducts] = useState<ProductWithTeam[]>([]);
@@ -292,13 +290,9 @@ const EditList = () => {
   };
 
   const handleDelete = async (productId: number, productName: string) => {
-    // =========================================================================
-    // HATA BURADAYDI VE DÜZELTİLDİ
-    // Vercel, aşağıdaki window.confirm satırında productName'in etrafındaki
-    // tırnak işaretlerinden ("...") dolayı hata veriyordu. Bu tırnak işaretleri kaldırıldı.
-    // Artık ürün adında tırnak işareti olsa bile hata vermeyecektir.
-    // =========================================================================
-    if (!window.confirm(`${productName} ürününü kalıcı olarak silmek istediğinizden emin misiniz?`)) { 
+    // ESLint hatası düzeltildi: Tırnak işaretleri kaldırıldı
+    const confirmMessage = `${productName} ürününü kalıcı olarak silmek istediğinizden emin misiniz?`;
+    if (!window.confirm(confirmMessage)) { 
       return; 
     }
     setDeletingId(productId);
@@ -306,7 +300,7 @@ const EditList = () => {
     try {
       const productToDelete = products.find(p => p.id === productId);
       
-      // İYİLEŞTİRME: Storage'dan daha güvenli silme
+      // Storage'dan daha güvenli silme
       if (productToDelete?.image_path) {
         const { error: storageError } = await supabase.storage.from('images').remove([productToDelete.image_path]);
         if (storageError) {
@@ -339,7 +333,7 @@ const EditList = () => {
       <div className="text-center py-12 bg-gray-50 rounded-lg">
         <FontAwesomeIcon icon={faExclamationTriangle} className="text-4xl text-gray-400 mb-3" />
         <p className="text-gray-600 font-medium">Henüz ürün eklenmemiş.</p>
-        <p className="text-sm text-gray-500 mt-1">Yeni ürün eklemek için "Yeni Ürün Ekle" butonuna tıklayın.</p>
+        <p className="text-sm text-gray-500 mt-1">Yeni ürün eklemek için &quot;Yeni Ürün Ekle&quot; butonuna tıklayın.</p>
       </div>
     );
   }
