@@ -180,10 +180,10 @@ const AddForm = () => {
         age_range: ageRange.trim(),
         price: priceValue,
         image_url: urlData.publicUrl,
+        image_path: imageFileName, // İYİLEŞTİRME: Silme işlemi için dosya yolunu da kaydet
       });
       if (insertError) throw new Error(`Veritabanına kaydedilemedi: ${insertError.message}`);
       const selectedTeam = teams.find(t => t.id.toString() === selectedTeamId);
-      // DÜZELTME: Tırnak işaretleri kaldırıldı.
       setMessage({ type: 'success', text: `${selectedTeam?.name} takımı için yeni forma başarıyla eklendi!` });
       resetForm();
     } catch (error: any) {
@@ -294,19 +294,22 @@ const EditList = () => {
   };
 
   const handleDelete = async (productId: number, productName: string) => {
-    // DÜZELTME: Tırnak işaretleri kaldırıldı.
+    // DÜZELTME: Tırnak işaretleri kaldırıldı
     if (!window.confirm(`${productName} ürününü kalıcı olarak silmek istediğinizden emin misiniz?`)) { return; }
     setDeletingId(productId);
     setMessage(null);
     try {
-      const product = products.find(p => p.id === productId);
-      if (product?.image_url) {
-        const urlParts = product.image_url.split('/');
-        const imagePath = urlParts.slice(urlParts.indexOf('public') + 1).join('/');
-        if (imagePath) {
-            await supabase.storage.from('images').remove([imagePath]);
+      const productToDelete = products.find(p => p.id === productId);
+      
+      // İYİLEŞTİRME: Storage'dan daha güvenli silme
+      if (productToDelete?.image_path) {
+        const { error: storageError } = await supabase.storage.from('images').remove([productToDelete.image_path]);
+        if (storageError) {
+          // Eğer resim silinemezse bile devam et ama konsola bir uyarı yaz
+          console.warn(`Görsel silinirken hata (DB'den silme işlemine devam ediliyor): ${storageError.message}`);
         }
       }
+
       const { error } = await supabase.from('products').delete().eq('id', productId);
       if (error) throw error;
       setMessage({ type: 'success', text: 'Ürün başarıyla silindi!' });
@@ -345,7 +348,7 @@ const EditList = () => {
           <span>{message.text}</span>
         </div>
       )}
-      <div className="text-sm text-gray-600 mb-2">Toplam {products.length} ürün listeleniyor</div>
+      <div className="text-sm text-gray-600 mb-2">{`Toplam ${products.length} ürün listeleniyor`}</div>
       {products.map(product => (
         <div key={product.id} className={`bg-gray-50 p-4 rounded-lg border transition-all hover:shadow-md ${editingProductId === product.id ? 'ring-2 ring-[var(--ring-color)] border-[var(--ring-color)]' : ''}`}>
           {editingProductId === product.id ? (
