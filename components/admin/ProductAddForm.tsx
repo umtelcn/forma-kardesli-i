@@ -265,7 +265,11 @@ const EditList = () => {
 
   const handleStartEdit = (product: ProductWithTeam) => {
     setEditingProductId(product.id);
-    setEditedValues({ price: product.price.toString(), description: product.description, age_range: product.age_range });
+    setEditedValues({ 
+      price: product.price.toString(), 
+      description: product.description || undefined, 
+      age_range: product.age_range || undefined 
+    });
     setMessage(null);
   };
   const handleCancelEdit = () => { setEditingProductId(null); setEditedValues({}); setMessage(null); };
