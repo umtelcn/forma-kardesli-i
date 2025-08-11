@@ -244,7 +244,10 @@ const EditList = () => {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('products').select('*, teams(*)').order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, teams(*)')
+        .order('created_at', { ascending: false });
       if (error) throw error;
       setProducts(data as ProductWithTeam[] || []);
     } catch (error: any) {
@@ -307,9 +310,12 @@ const EditList = () => {
     try {
       const productToDelete = products.find(p => p.id === productId);
       
-      // Storage'dan daha güvenli silme
-      if (productToDelete?.image_path) {
-        const { error: storageError } = await supabase.storage.from('images').remove([productToDelete.image_path]);
+      // Storage'dan daha güvenli silme - image_path kontrolü
+      const imagePath = (productToDelete as any)?.image_path;
+      if (imagePath) {
+        const { error: storageError } = await supabase.storage
+          .from('images')
+          .remove([imagePath]);
         if (storageError) {
           console.warn(`Görsel silinirken hata (DB'den silme işlemine devam ediliyor): ${storageError.message}`);
         }
