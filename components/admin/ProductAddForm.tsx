@@ -130,7 +130,10 @@ const AddForm = () => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const { data, error } = await supabase.from('teams').select('id, name').order('name');
+        const { data, error } = await supabase
+          .from('teams')
+          .select('id, name, logo_url, primary_color, secondary_color')
+          .order('name');
         if (error) throw error;
         setTeams(data || []);
       } catch (error) {
