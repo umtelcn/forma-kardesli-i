@@ -3,8 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShirt } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram } from '@fortawesome/free-brands-svg-icons';
 
 interface HeaderProps {
@@ -21,7 +21,7 @@ export default function Header({ setCurrentPage, setInitialTab }: HeaderProps) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const headerHeight = 'h-16 sm:h-20';
+  const headerHeight = 'h-20 sm:h-24 md:h-28';
 
   const goHome = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -44,46 +44,54 @@ export default function Header({ setCurrentPage, setInitialTab }: HeaderProps) {
         role="banner"
       >
         <nav
-          className="container mx-auto flex h-full items-center justify-between gap-4 px-4 sm:px-6"
+          className="container mx-auto flex h-full items-center justify-between gap-6 px-4 sm:px-6"
           aria-label="Primary"
         >
-          {/* Logo + Marka */}
+          {/* Logo + Başlık + Slogan */}
           <Link
             href="#"
             onClick={goHome}
-            className="group flex items-center gap-3"
+            className="group flex items-center gap-4 hover:opacity-90 transition-opacity duration-200"
             aria-label="Askıda Forma ana sayfa"
           >
-            {/* Yuvarlak çerçeve içinde forma ikonu */}
-            <div className="relative flex items-center justify-center w-12 h-12 rounded-full border-2 border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm group-hover:scale-105 transition-transform duration-300">
-              <FontAwesomeIcon icon={faShirt} className="h-6 w-6 text-emerald-600" />
+            {/* İkon */}
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14">
+              <Image
+                src="/askida-forma.svg"
+                alt="Askıda Forma Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
 
-            {/* Marka adı + slogan */}
-            <div className="flex flex-col leading-tight">
-              <span className="text-lg sm:text-xl font-semibold text-slate-900 tracking-[-0.01em]">
+            {/* Metin */}
+            <div className="flex flex-col">
+              <span className="font-sugo-light text-2xl sm:text-3xl md:text-4xl text-slate-800 leading-none">
                 Askıda Forma
               </span>
-              <span className="text-xs sm:text-sm text-emerald-600 font-medium italic">
-                “Bir forma, bir umut, bin gülümseme”
+              <span className="text-xs sm:text-sm md:text-base text-[#77b65d]">
+                Bir forma, bir umut, bin gülümse
               </span>
             </div>
           </Link>
 
-          {/* Instagram ikonu */}
+          {/* Sağ taraf - Instagram */}
           <div className="flex items-center gap-2">
-            <button
-              aria-label="Instagram"
-              className="p-2 rounded-full border border-slate-200 bg-white text-pink-500 hover:text-pink-600 hover:border-pink-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400/70"
-              // TODO: href ekle
+            <a
+              href="https://instagram.com/askidaforma"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram'da takip edin"
+              className="p-2.5 rounded-full border border-slate-200 bg-white text-pink-500 hover:text-pink-600 hover:border-pink-300 hover:bg-pink-50 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400/70 shadow-sm"
             >
               <FontAwesomeIcon icon={faInstagram} className="h-5 w-5" />
-            </button>
+            </a>
           </div>
         </nav>
 
-        {/* Alt vurgu çizgisi */}
-        <div className="h-px bg-gradient-to-r from-transparent via-emerald-500/15 to-transparent" />
+        {/* Alt dekoratif çizgi */}
+        <div className="h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
       </header>
     </>
   );

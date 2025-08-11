@@ -13,26 +13,18 @@ import SonBagislar from './SonBagislar';
 import SssFooter from './SssFooter';
 import { Team, Donation, Total, RecentDonation } from '../lib/types';
 
-// Helper: Renk stilleri
+// Helper: Renk stilleri - İsteğiniz üzerine güncellendi
 function getColorClasses(color: string) {
   const colorMap = {
-    emerald: {
-      gradient: 'from-emerald-400 to-emerald-600',
-      border: 'border-emerald-200',
-      text: 'text-emerald-700',
-    },
-    blue: {
-      gradient: 'from-blue-400 to-blue-600',
-      border: 'border-blue-200',
-      text: 'text-blue-700',
-    },
-    purple: {
-      gradient: 'from-purple-400 to-purple-600',
-      border: 'border-purple-200',
-      text: 'text-purple-700',
+    // Tüm sekmeler için yeni renk şeması
+    mainGreen: {
+      gradient: 'from-[#8BC34A] to-[#77b65d]', // Lighter to main
+      border: 'border-[#77b65d]/40',           // Main color with opacity
+      text: 'text-[#4CAF50]',                  // Darker, more saturated green
     },
   };
-  return colorMap[color as keyof typeof colorMap] || colorMap.emerald;
+  // Artık tek renk şeması olduğu için doğrudan onu döndürüyoruz.
+  return colorMap.mainGreen;
 }
 
 interface TabData {
@@ -118,9 +110,10 @@ function TabButtonMobile({ tab, isActive, onClick }: TabButtonProps) {
 
 // "Çok Yakında" alanı
 function ComingSoonSection() {
+    const colorClasses = getColorClasses('mainGreen');
   return (
-    <div className="text-center py-16 bg-gradient-to-br from-white via-gray-50 to-purple-50/30 rounded-3xl shadow-lg border border-gray-100">
-      <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-400 to-purple-600 shadow-xl shadow-purple-500/25 mb-8">
+    <div className={`text-center py-16 bg-gradient-to-br from-white via-gray-50 to-[#77b65d]/10 rounded-3xl shadow-lg border border-gray-100`}>
+      <div className={`inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br ${colorClasses.gradient} shadow-xl shadow-lime-500/20 mb-8`}>
         <FontAwesomeIcon icon={faImages} className="text-white text-4xl drop-shadow-sm" />
       </div>
       <h3 className="text-4xl font-bold text-gray-800 mb-4">Çok Yakında!</h3>
@@ -178,10 +171,12 @@ export default function MainContent({
   }, [initialTab]);
 
   const tabs: TabData[] = [
-    { id: 'donate', label: 'Forma Bağışla', icon: faGift, color: 'emerald' },
-    { id: 'donations', label: 'Bağış Listesi', icon: faListCheck, color: 'blue' },
-    { id: 'happiness', label: 'Mutluluk Galerisi', icon: faImages, color: 'purple' },
+    { id: 'donate', label: 'Forma Bağışla', icon: faGift, color: 'mainGreen' },
+    { id: 'donations', label: 'Bağış Listesi', icon: faListCheck, color: 'mainGreen' },
+    { id: 'happiness', label: 'Mutluluk Galerisi', icon: faImages, color: 'mainGreen' },
   ];
+  
+  const activeColorClasses = getColorClasses('mainGreen');
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -229,7 +224,7 @@ export default function MainContent({
         {isLoading && (
           <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
             <div className="flex items-center gap-3 text-gray-600">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500 border-t-transparent"></div>
+              <div className={`animate-spin rounded-full h-6 w-6 border-2 border-[#77b65d] border-t-transparent`}></div>
               <span>Yükleniyor...</span>
             </div>
           </div>

@@ -20,20 +20,27 @@ export default function IbanPage({ donation, onBack, onContinue }: IbanPageProps
   const aliciAdi = 'Çocuklar Üşümesin Yardımlaşma ve Dayanışma Derneği';
   const ibanDisplay = 'TR36 0001 0011 5098 1058 3050 01';
   const ibanRaw = ibanDisplay.replace(/\s+/g, '');
-  const productImg = donation.imageUrl || '/placeholder-jersey.png';
+  const productImg = donation.imageUrl || '/placeholder-jersey.png'; // Make sure this placeholder exists in /public
 
+  // A robust copy function that works in most environments, including secure contexts and fallbacks.
   const copySafe = async (text: string) => {
     try {
+      // Modern async clipboard API
       await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
+    } catch (err) {
+      // Fallback for older browsers or environments where the API might fail
       const ta = document.createElement('textarea');
       ta.value = text;
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
       document.body.appendChild(ta);
       ta.select();
-      document.execCommand('copy');
+      try {
+        document.execCommand('copy');
+      } catch (copyErr) {
+        console.error('Fallback copy failed', copyErr);
+      }
       document.body.removeChild(ta);
-      return true;
     }
   };
 
@@ -63,7 +70,7 @@ export default function IbanPage({ donation, onBack, onContinue }: IbanPageProps
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center justify-center">
-                <Image src={productImg} alt={donation.teamName || 'Ürün'} width={48} height={48} className="object-contain w-full h-full" />
+                <Image src={productImg} alt={donation.teamName || 'Ürün Görseli'} width={48} height={48} className="object-contain w-full h-full" />
               </div>
               <div className="flex-1">
                 <p className="text-gray-700 text-sm mb-1">
@@ -124,7 +131,8 @@ export default function IbanPage({ donation, onBack, onContinue }: IbanPageProps
                 <FontAwesomeIcon icon={faCircleInfo} className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 <div className="text-sm">
                   <p className="font-medium mb-1">Bilgilendirme</p>
-                  <p>Alıcı adına kısaca “Çocuklar Üşümesin” yazmanız yeterlidir.</p>
+                  {/* LINTING FIX: Using &quot; to prevent build errors */}
+                  <p>Alıcı adına kısaca &quot;Çocuklar Üşümesin&quot; yazmanız yeterlidir.</p>
                 </div>
               </div>
             </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { supabase } from '../lib/supabase';
 import { Donation } from '../lib/types';
@@ -10,7 +10,8 @@ import { Donation } from '../lib/types';
 interface UserInfoPageProps {
   donation: Donation;
   onBack: () => void;
-  onComplete: () => void;
+  // This interface is updated to specify that onComplete will receive the donor's data.
+  onComplete: (donorInfo: any) => void;
 }
 
 type IdentityType = 'name' | 'instagram' | 'twitter';
@@ -29,6 +30,7 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Prepare the donor information object to be saved and passed on.
     const donorInfo: any = {
       name: '',
       surname: '',
@@ -41,14 +43,15 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
 
     if (identityType === 'name') {
       donorInfo.name = formData.name || 'İsimsiz';
-      donorInfo.surname = formData.surname || '';
+      donorInfo.surname = formData.surname || 'Kahraman';
       donorInfo.display_name = `${donorInfo.name} ${donorInfo.surname}`.trim();
     } else {
       const handle = (formData.handle || 'kullanici').replace(/^@/, '');
       donorInfo.display_name = `@${handle}`;
       donorInfo[`${identityType}_handle`] = handle;
       donorInfo.name = `@${handle}`;
-      donorInfo.surname = '';
+      // A placeholder is added to the surname field to prevent database errors.
+      donorInfo.surname = `(${identityType === 'instagram' ? 'Instagram' : 'Twitter/X'})`;
     }
 
     try {
@@ -70,7 +73,10 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
 
       if (donationError) throw donationError;
 
-      onComplete();
+      // **CRITICAL FIX:** Pass the collected user info to the parent component.
+      // This makes the data available for the ThankYouPage.
+      onComplete(donorInfo);
+
     } catch (error: any) {
       alert(`Bir hata oluştu: ${error.message}`);
     } finally {
@@ -80,8 +86,8 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
 
   const getButtonClass = (type: IdentityType) =>
     identityType === type
-      ? 'bg-emerald-600 text-white'
-      : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+      ? 'bg-emerald-600 text-white shadow-md'
+      : 'bg-gray-100 text-gray-600 hover:bg-gray-200';
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fadeIn">
@@ -96,26 +102,26 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
           <button
             type="button"
             onClick={() => setIdentityType('name')}
-            className={`py-3 px-2 rounded-lg text-sm flex flex-col items-center ${getButtonClass('name')}`}
+            className={`py-3 px-2 rounded-lg text-sm flex flex-col items-center justify-center gap-1 transition-all ${getButtonClass('name')}`}
           >
-            <FontAwesomeIcon icon={faUser} className="mb-1" />
-            Ad Soyad
+            <FontAwesomeIcon icon={faUser} />
+            <span>Ad Soyad</span>
           </button>
           <button
             type="button"
             onClick={() => setIdentityType('instagram')}
-            className={`py-3 px-2 rounded-lg text-sm flex flex-col items-center ${getButtonClass('instagram')}`}
+            className={`py-3 px-2 rounded-lg text-sm flex flex-col items-center justify-center gap-1 transition-all ${getButtonClass('instagram')}`}
           >
-            <FontAwesomeIcon icon={faInstagram} className="mb-1" />
-            Instagram
+            <FontAwesomeIcon icon={faInstagram} />
+            <span>Instagram</span>
           </button>
           <button
             type="button"
             onClick={() => setIdentityType('twitter')}
-            className={`py-3 px-2 rounded-lg text-sm flex flex-col items-center ${getButtonClass('twitter')}`}
+            className={`py-3 px-2 rounded-lg text-sm flex flex-col items-center justify-center gap-1 transition-all ${getButtonClass('twitter')}`}
           >
-            <FontAwesomeIcon icon={faTwitter} className="mb-1" />
-            Twitter/X
+            <FontAwesomeIcon icon={faTwitter} />
+            <span>Twitter/X</span>
           </button>
         </div>
 
@@ -127,7 +133,7 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full p-3 border rounded-lg"
+                className="w-full p-3 border rounded-lg shadow-sm"
                 placeholder="Adınız"
               />
               <input
@@ -135,8 +141,8 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
                 name="surname"
                 value={formData.surname}
                 onChange={handleInputChange}
-                className="w-full p-3 border rounded-lg"
-                placeholder="Soyadınız"
+                className="w-full p-3 border rounded-lg shadow-sm"
+                placeholder="Soyadınız (isteğe bağlı)"
               />
             </>
           )}
@@ -147,7 +153,7 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
               name="handle"
               value={formData.handle}
               onChange={handleInputChange}
-              className="w-full p-3 border rounded-lg"
+              className="w-full p-3 border rounded-lg shadow-sm"
               placeholder="@kullaniciadiniz"
             />
           )}
@@ -157,7 +163,7 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            className="w-full p-3 border rounded-lg"
+            className="w-full p-3 border rounded-lg shadow-sm"
             placeholder="E-posta (isteğe bağlı)"
           />
 
@@ -165,16 +171,23 @@ export default function UserInfoPage({ donation, onBack, onComplete }: UserInfoP
             <button
               type="button"
               onClick={onBack}
-              className="w-1/3 bg-gray-200 text-gray-700 py-3 rounded-xl"
+              className="w-1/3 bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-300 transition"
             >
               Geri
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-2/3 bg-emerald-600 text-white py-3 rounded-xl"
+              className="w-2/3 bg-emerald-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition hover:bg-emerald-700 disabled:opacity-60"
             >
-              {isSubmitting ? 'Gönderiliyor...' : 'Bağışı Tamamla'}
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Gönderiliyor...</span>
+                </>
+              ) : (
+                'Bağışı Tamamla'
+              )}
             </button>
           </div>
         </form>

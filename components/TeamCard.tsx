@@ -12,15 +12,15 @@ interface TeamCardProps {
   onStartDonation: (d: Donation) => void;
 }
 
+// Helper function to prevent text from being unreadable on very light backgrounds
 function ensureContrast(bg: string, fallback = '#1f2937') {
-  // Basit luminance kontrolü: Zayıfsa koyu griye düş.
   try {
     const hex = bg.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16) / 255;
-    const g = parseInt(hex.substring(2, 4), 16) / 255;
-    const b = parseInt(hex.substring(4, 6), 16) / 255;
-    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    return lum > 0.8 ? fallback : bg; // çok açık renkse fallback
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.8 ? fallback : bg; // If color is too light, use the dark gray fallback
   } catch {
     return fallback;
   }
@@ -36,6 +36,7 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
 
   const price = product.price ?? 0;
 
+  // Memoize the currency formatter for performance
   const formatter = useMemo(
     () =>
       new Intl.NumberFormat('tr-TR', {
@@ -53,10 +54,10 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
 
   return (
     <article
-      className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-lg"
+      className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-lg flex flex-col"
       style={{ borderTop: `6px solid ${primaryColor}` }}
     >
-      {/* ÜST GÖRSEL */}
+      {/* Product Image */}
       <div className="relative w-full bg-gray-50">
         <div className="relative mx-auto w-full max-w-[520px] aspect-[16/10]">
           {product.image_url ? (
@@ -76,9 +77,9 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
         </div>
       </div>
 
-      {/* İÇERİK */}
-      <div className="p-4 sm:p-5">
-        {/* Başlık ve Logo */}
+      {/* Content */}
+      <div className="p-4 sm:p-5 flex flex-col flex-grow">
+        {/* Header and Logo */}
         <div className="flex items-center gap-2">
           {team.logo_url ? (
             <Image
@@ -100,9 +101,9 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
           </h3>
         </div>
 
-        {/* Açıklama ve etiketler */}
+        {/* Description and Tags */}
         {product.description && (
-          <p className="mt-2 text-sm text-gray-700 line-clamp-2">
+          <p className="mt-2 text-sm text-gray-700 line-clamp-2 h-10">
             {product.description}
           </p>
         )}
@@ -114,8 +115,8 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
           </div>
         )}
 
-        {/* Fiyat / Adet / Toplam */}
-        <div className="mt-4 grid grid-cols-1 gap-3">
+        {/* Price / Quantity / Total */}
+        <div className="mt-auto pt-4 space-y-3">
           <div className="flex items-end justify-between">
             <div>
               <p className="text-xs text-gray-500">Fiyat</p>
@@ -134,7 +135,7 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
             </div>
           </div>
 
-          {/* Adet Kontrolü */}
+          {/* Quantity Controls */}
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm font-semibold text-gray-700">Adet</span>
             <div className="flex items-center gap-2 border border-gray-200 rounded-full px-2 py-1">
@@ -166,7 +167,7 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
             </div>
           </div>
 
-          {/* CTA */}
+          {/* CTA Button */}
           <button
             onClick={() =>
               onStartDonation({
@@ -178,6 +179,11 @@ export default function TeamCard({ product, onStartDonation }: TeamCardProps) {
                 quantity,
                 total,
                 imageUrl: product.image_url,
+                // DÜZELTME: Teşekkür kartının doğru renklenmesi için
+                // bu bilgileri de gönderiyoruz.
+                teamLogo: team.logo_url,
+                primaryColor: team.primary_color,
+                secondaryColor: team.secondary_color,
               })
             }
             className="w-full mt-1 text-base font-bold py-3 rounded-xl transition-transform hover:scale-[1.015] active:scale-[0.99] shadow-sm"

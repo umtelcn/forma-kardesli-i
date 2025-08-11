@@ -1,4 +1,7 @@
+// lib/types.ts
+
 // Takımların temel bilgilerini içeren tip.
+// Renk alanları eklendi.
 export type Team = {
   id: number;
   name: string;
@@ -8,7 +11,7 @@ export type Team = {
   created_at?: string;
 };
 
-// Her bir formayı (ürünü) temsil eden yeni tip.
+// Her bir formayı (ürünü) temsil eden tip.
 export type Product = {
   id: number;
   team_id: number;
@@ -26,6 +29,7 @@ export type ProductWithTeam = Product & {
 };
 
 // Bağış yapma sürecinde kullanılan geçici veriyi tutan tip.
+// Teşekkür kartı için renk ve logo alanları eklendi.
 export type Donation = {
   type: 'jersey' | 'pool';
   teamId: number;
@@ -33,6 +37,9 @@ export type Donation = {
   quantity: number | null;
   total: number;
   imageUrl?: string | null;
+  teamLogo?: string;
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
 };
 
 // Takımların toplam forma bağışlarını gösteren liderlik tablosu için tip.
@@ -42,12 +49,12 @@ export type Total = {
   total_jerseys: number;
 };
 
-// Donor bilgileri
+// Bağışçı bilgilerini içeren tip.
 export type Donor = {
   id: number;
-  name: string;
-  surname: string;
-  email: string;
+  name: string | null;
+  surname: string | null;
+  email: string | null;
   instagram_handle: string | null;
   twitter_handle: string | null;
   display_name: string | null;
@@ -62,22 +69,12 @@ export type RecentDonation = {
   type: 'jersey' | 'pool';
   quantity: number | null;
   amount_tl: number;
-  // Join ile gelen team bilgisi
   teams: {
     id: number;
     name: string;
     logo_url: string | null;
   };
-  // Join ile gelen donor bilgisi
-  donors: {
-    id: number;
-    display_name: string | null;
-    identity_type: 'name' | 'instagram' | 'twitter' | null;
-    instagram_handle: string | null;
-    twitter_handle: string | null;
-    name: string;
-    surname: string;
-  };
+  donors: Donor; // Donor tipini doğrudan kullanıyoruz.
 };
 
 // Sıkça Sorulan Sorular bölümü için tip.

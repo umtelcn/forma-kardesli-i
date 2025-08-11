@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { faqData } from '../lib/constants';
 import { FAQ } from '../lib/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,15 +22,15 @@ function FaqItem({ faq }: { faq: FAQ }) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full flex justify-between items-start gap-3 text-left px-5 py-4 rounded-xl transition-colors duration-300 group
-          ${isOpen ? 'bg-emerald-50 text-emerald-700' : 'hover:bg-gray-50'}`}
+          ${isOpen ? 'bg-[#77b65d]/10 text-[#4CAF50]' : 'hover:bg-gray-50'}`}
       >
         <div className="flex items-start gap-3">
           <FontAwesomeIcon
             icon={faQuestionCircle}
             className={`w-5 h-5 mt-1 flex-shrink-0 transition-colors duration-300 ${
               isOpen
-                ? 'text-emerald-600'
-                : 'text-emerald-500 group-hover:text-emerald-600'
+                ? 'text-[#77b65d]'
+                : 'text-[#77b65d]/80 group-hover:text-[#77b65d]'
             }`}
           />
           <span className="text-base font-semibold">{faq.q}</span>
@@ -37,7 +38,7 @@ function FaqItem({ faq }: { faq: FAQ }) {
         <FontAwesomeIcon
           icon={faChevronDown}
           className={`w-4 h-4 mt-1 transition-transform duration-300 ${
-            isOpen ? 'rotate-180 text-emerald-500' : 'text-gray-400'
+            isOpen ? 'rotate-180 text-[#77b65d]' : 'text-gray-400'
           }`}
         />
       </button>
@@ -47,7 +48,7 @@ function FaqItem({ faq }: { faq: FAQ }) {
         }`}
       >
         <div
-          className="px-6 pb-5 pl-14 text-sm text-gray-600 leading-relaxed [&_a]:text-emerald-600 [&_a]:underline"
+          className="px-6 pb-5 pl-14 text-sm text-gray-600 leading-relaxed [&_a]:text-[#5a8f46] [&_a]:underline"
           dangerouslySetInnerHTML={{ __html: faq.a }}
         ></div>
       </div>
@@ -74,20 +75,28 @@ function FaqSection() {
 
 function ProjectFooter({ onAdminClick }: { onAdminClick: () => void }) {
   return (
-    <footer className="text-center py-10 text-gray-400 text-sm">
-      <p className="mb-2">
-        &copy; 2025{' '}
-        <span className="text-gray-600 font-medium">Askıda Forma</span>
-      </p>
-      <p className="text-xs">
-        Çocuklar Üşümesin Yardımlaşma ve Dayanışma Derneği Projesidir.
-      </p>
+    <footer className="text-center py-10">
       <button
         onClick={onAdminClick}
-        className="mt-4 text-xs text-gray-400 hover:text-emerald-600 transition-colors underline"
+        className="inline-flex items-center gap-2.5 text-gray-500 hover:text-gray-800 transition-colors duration-300 group"
+        aria-label="Yönetici Paneli Girişi"
       >
-        Telif Hakkı & Yönetici Girişi
+        <Image 
+            src="/askida-forma.svg" 
+            alt="Askıda Forma Logosu" 
+            width={24} 
+            height={24} 
+            className="group-hover:opacity-80 transition-opacity"
+        />
+        <span className="text-sm font-medium">
+          Askıda Kıyafet
+        </span>
       </button>
+      
+      {/* İsteğiniz üzerine metin yeniden eklendi */}
+      <p className="text-xs text-gray-400 mt-3">
+        Çocuklar Üşümesin Yardımlaşma ve Dayanışma Derneği Projesidir.
+      </p>
     </footer>
   );
 }
