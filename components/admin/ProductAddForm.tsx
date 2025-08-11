@@ -275,17 +275,38 @@ const EditList = () => {
     });
     setMessage(null);
   };
-  const handleCancelEdit = () => { setEditingProductId(null); setEditedValues({}); setMessage(null); };
-  const handleInputChange = (field: string, value: string) => { setEditedValues(prev => ({ ...prev, [field]: value })); };
+  
+  const handleCancelEdit = () => { 
+    setEditingProductId(null); 
+    setEditedValues({}); 
+    setMessage(null); 
+  };
+  
+  const handleInputChange = (field: string, value: string) => { 
+    setEditedValues(prev => ({ ...prev, [field]: value })); 
+  };
   
   const handleSave = async (productId: number) => {
     const priceValue = parseFloat(editedValues.price || '0');
-    if (!editedValues.price || priceValue < 0 || isNaN(priceValue)) { setMessage({ type: 'error', text: 'Geçerli bir fiyat giriniz.' }); return; }
-    if (!editedValues.description?.trim() || !editedValues.age_range?.trim()) { setMessage({ type: 'error', text: 'Tüm alanları doldurunuz.' }); return; }
+    if (!editedValues.price || priceValue < 0 || isNaN(priceValue)) { 
+      setMessage({ type: 'error', text: 'Geçerli bir fiyat giriniz.' }); 
+      return; 
+    }
+    if (!editedValues.description?.trim() || !editedValues.age_range?.trim()) { 
+      setMessage({ type: 'error', text: 'Tüm alanları doldurunuz.' }); 
+      return; 
+    }
     setSavingId(productId);
     setMessage(null);
     try {
-      const { error } = await supabase.from('products').update({ price: priceValue, description: editedValues.description.trim(), age_range: editedValues.age_range.trim() }).eq('id', productId);
+      const { error } = await supabase
+        .from('products')
+        .update({ 
+          price: priceValue, 
+          description: editedValues.description.trim(), 
+          age_range: editedValues.age_range.trim() 
+        })
+        .eq('id', productId);
       if (error) throw error;
       setMessage({ type: 'success', text: 'Ürün başarıyla güncellendi!' });
       setEditingProductId(null);
@@ -310,7 +331,7 @@ const EditList = () => {
     try {
       const productToDelete = products.find(p => p.id === productId);
       
-      // Storage'dan daha güvenli silme - image_path kontrolü
+      // Storage'dan daha güvenli silme - TypeScript hatası düzeltildi
       const imagePath = (productToDelete as any)?.image_path;
       if (imagePath) {
         const { error: storageError } = await supabase.storage
@@ -341,6 +362,7 @@ const EditList = () => {
       </div>
     );
   }
+  
   if (products.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -365,23 +387,58 @@ const EditList = () => {
           {editingProductId === product.id ? (
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <Image src={product.image_url} alt={product.description} width={64} height={64} className="object-contain rounded-md bg-white border" />
+                <Image 
+                  src={product.image_url || '/placeholder-jersey.png'} 
+                  alt={product.description || 'Ürün görseli'} 
+                  width={64} 
+                  height={64} 
+                  className="object-contain rounded-md bg-white border" 
+                />
                 <div className="flex-grow space-y-2">
                   <div className="font-bold text-gray-800">{product.teams.name}</div>
-                  <input type="text" value={editedValues.description || ''} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Ürün açıklaması" className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" />
+                  <input 
+                    type="text" 
+                    value={editedValues.description || ''} 
+                    onChange={(e) => handleInputChange('description', e.target.value)} 
+                    placeholder="Ürün açıklaması" 
+                    className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" 
+                  />
                   <div className="grid grid-cols-2 gap-2">
-                    <input type="text" value={editedValues.age_range || ''} onChange={(e) => handleInputChange('age_range', e.target.value)} placeholder="Yaş aralığı" className="p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" />
+                    <input 
+                      type="text" 
+                      value={editedValues.age_range || ''} 
+                      onChange={(e) => handleInputChange('age_range', e.target.value)} 
+                      placeholder="Yaş aralığı" 
+                      className="p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" 
+                    />
                     <div className="flex gap-1">
-                      <input type="number" value={editedValues.price || ''} onChange={(e) => handleInputChange('price', e.target.value)} placeholder="Fiyat" step="0.01" min="0" className="flex-grow p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" />
+                      <input 
+                        type="number" 
+                        value={editedValues.price || ''} 
+                        onChange={(e) => handleInputChange('price', e.target.value)} 
+                        placeholder="Fiyat" 
+                        step="0.01" 
+                        min="0" 
+                        className="flex-grow p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" 
+                      />
                       <span className="flex items-center px-2 text-sm text-gray-600">TL</span>
                     </div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button onClick={() => handleSave(product.id)} disabled={savingId === product.id} style={{ backgroundColor: customGreenDark }} className="flex-1 text-white px-3 py-2 rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm font-medium">
+                    <button 
+                      onClick={() => handleSave(product.id)} 
+                      disabled={savingId === product.id} 
+                      style={{ backgroundColor: customGreenDark }} 
+                      className="flex-1 text-white px-3 py-2 rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+                    >
                       <FontAwesomeIcon icon={savingId === product.id ? faSpinner : faSave} className={savingId === product.id ? 'animate-spin' : ''} />
                       {savingId === product.id ? 'Kaydediliyor...' : 'Kaydet'}
                     </button>
-                    <button onClick={handleCancelEdit} disabled={savingId === product.id} className="px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium">
+                    <button 
+                      onClick={handleCancelEdit} 
+                      disabled={savingId === product.id} 
+                      className="px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                    >
                       <FontAwesomeIcon icon={faTimes} className="mr-1" />
                       İptal
                     </button>
@@ -391,16 +448,34 @@ const EditList = () => {
             </div>
           ) : (
             <div className="flex items-center justify-between gap-4">
-              <Image src={product.image_url} alt={product.description} width={56} height={56} className="object-contain rounded-md bg-white border flex-shrink-0" />
+              <Image 
+                src={product.image_url || '/placeholder-jersey.png'} 
+                alt={product.description || 'Ürün görseli'} 
+                width={56} 
+                height={56} 
+                className="object-contain rounded-md bg-white border flex-shrink-0" 
+              />
               <div className="flex-grow min-w-0">
                 <p className="font-bold text-gray-800 truncate">{product.teams.name}</p>
-                <p className="text-sm text-gray-600 truncate">{product.description}</p>
-                <p className="text-xs text-gray-500">{product.age_range}</p>
+                <p className="text-sm text-gray-600 truncate">{product.description || 'Açıklama yok'}</p>
+                <p className="text-xs text-gray-500">{product.age_range || 'Yaş aralığı belirtilmemiş'}</p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <span className="font-bold text-lg min-w-[80px] text-right" style={{ color: customGreenDark }}>{product.price} TL</span>
-                <button onClick={() => handleStartEdit(product)} disabled={deletingId === product.id} className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" title="Düzenle"><FontAwesomeIcon icon={faPen} /></button>
-                <button onClick={() => handleDelete(product.id, `${product.teams.name} - ${product.description}`)} disabled={deletingId === product.id} className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" title="Sil">
+                <button 
+                  onClick={() => handleStartEdit(product)} 
+                  disabled={deletingId === product.id} 
+                  className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                  title="Düzenle"
+                >
+                  <FontAwesomeIcon icon={faPen} />
+                </button>
+                <button 
+                  onClick={() => handleDelete(product.id, `${product.teams.name} - ${product.description || 'Ürün'}`)} 
+                  disabled={deletingId === product.id} 
+                  className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                  title="Sil"
+                >
                   <FontAwesomeIcon icon={deletingId === product.id ? faSpinner : faTrash} className={deletingId === product.id ? 'animate-spin' : ''} />
                 </button>
               </div>
