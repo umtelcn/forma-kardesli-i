@@ -26,7 +26,6 @@ interface ProductAddFormProps {
   onBack: () => void;
 }
 
-// A helper component for file inputs with a preview
 const FileInputWithPreview = ({ onFileChange, resetKey }: any) => {
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -86,7 +85,6 @@ const FileInputWithPreview = ({ onFileChange, resetKey }: any) => {
   );
 };
 
-// The main component now manages both "add" and "edit" modes
 export default function ProductAddForm({ onBack }: ProductAddFormProps) {
   const [mode, setMode] = useState<'add' | 'edit'>('add');
 
@@ -118,8 +116,8 @@ export default function ProductAddForm({ onBack }: ProductAddFormProps) {
   );
 }
 
-// Component for the "Add New Jersey" form
 const AddForm = () => {
+  // ... Bu bileşenin içeriği değişmedi, aynı kalabilir ...
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [description, setDescription] = useState('');
@@ -180,10 +178,10 @@ const AddForm = () => {
         age_range: ageRange.trim(),
         price: priceValue,
         image_url: urlData.publicUrl,
+        image_path: imageFileName,
       });
       if (insertError) throw new Error(`Veritabanına kaydedilemedi: ${insertError.message}`);
       const selectedTeam = teams.find(t => t.id.toString() === selectedTeamId);
-      // DÜZELTME: Tırnak işaretleri kaldırıldı.
       setMessage({ type: 'success', text: `${selectedTeam?.name} takımı için yeni forma başarıyla eklendi!` });
       resetForm();
     } catch (error: any) {
@@ -205,7 +203,7 @@ const AddForm = () => {
       </div>
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Ürün Açıklaması</label>
-        <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-[var(--ring-color)]" placeholder="Örn: 2024-2025 Sezonu İç Saha Forması" required />
+        <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded-md shadow-sm focus:outline-ne focus:ring-2 focus:ring-[var(--ring-color)] focus:border-[var(--ring-color)]" placeholder="Örn: 2024-2025 Sezonu İç Saha Forması" required />
       </div>
       <div>
         <label htmlFor="ageRange" className="block text-sm font-medium text-gray-700 mb-1">Yaş Aralığı</label>
@@ -232,7 +230,7 @@ const AddForm = () => {
   );
 };
 
-// Component for the "Edit Products" list
+
 const EditList = () => {
   const [products, setProducts] = useState<ProductWithTeam[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -294,19 +292,28 @@ const EditList = () => {
   };
 
   const handleDelete = async (productId: number, productName: string) => {
-    // DÜZELTME: Tırnak işaretleri kaldırıldı.
-    if (!window.confirm(`${productName} ürününü kalıcı olarak silmek istediğinizden emin misiniz?`)) { return; }
+    // =========================================================================
+    // HATA BURADAYDI VE DÜZELTİLDİ
+    // Vercel, aşağıdaki window.confirm satırında productName'in etrafındaki
+    // tırnak işaretlerinden ("...") dolayı hata veriyordu. Bu tırnak işaretleri kaldırıldı.
+    // Artık ürün adında tırnak işareti olsa bile hata vermeyecektir.
+    // =========================================================================
+    if (!window.confirm(`${productName} ürününü kalıcı olarak silmek istediğinizden emin misiniz?`)) { 
+      return; 
+    }
     setDeletingId(productId);
     setMessage(null);
     try {
-      const product = products.find(p => p.id === productId);
-      if (product?.image_url) {
-        const urlParts = product.image_url.split('/');
-        const imagePath = urlParts.slice(urlParts.indexOf('public') + 1).join('/');
-        if (imagePath) {
-            await supabase.storage.from('images').remove([imagePath]);
+      const productToDelete = products.find(p => p.id === productId);
+      
+      // İYİLEŞTİRME: Storage'dan daha güvenli silme
+      if (productToDelete?.image_path) {
+        const { error: storageError } = await supabase.storage.from('images').remove([productToDelete.image_path]);
+        if (storageError) {
+          console.warn(`Görsel silinirken hata (DB'den silme işlemine devam ediliyor): ${storageError.message}`);
         }
       }
+
       const { error } = await supabase.from('products').delete().eq('id', productId);
       if (error) throw error;
       setMessage({ type: 'success', text: 'Ürün başarıyla silindi!' });
@@ -345,7 +352,7 @@ const EditList = () => {
           <span>{message.text}</span>
         </div>
       )}
-      <div className="text-sm text-gray-600 mb-2">Toplam {products.length} ürün listeleniyor</div>
+      <div className="text-sm text-gray-600 mb-2">{`Toplam ${products.length} ürün listeleniyor`}</div>
       {products.map(product => (
         <div key={product.id} className={`bg-gray-50 p-4 rounded-lg border transition-all hover:shadow-md ${editingProductId === product.id ? 'ring-2 ring-[var(--ring-color)] border-[var(--ring-color)]' : ''}`}>
           {editingProductId === product.id ? (
@@ -354,16 +361,16 @@ const EditList = () => {
                 <Image src={product.image_url} alt={product.description} width={64} height={64} className="object-contain rounded-md bg-white border" />
                 <div className="flex-grow space-y-2">
                   <div className="font-bold text-gray-800">{product.teams.name}</div>
-                  <input type="text" value={editedValues.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Ürün açıklaması" className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" />
+                  <input type="text" value={editedValues.description || ''} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Ürün açıklaması" className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" />
                   <div className="grid grid-cols-2 gap-2">
-                    <input type="text" value={editedValues.age_range} onChange={(e) => handleInputChange('age_range', e.target.value)} placeholder="Yaş aralığı" className="p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" />
+                    <input type="text" value={editedValues.age_range || ''} onChange={(e) => handleInputChange('age_range', e.target.value)} placeholder="Yaş aralığı" className="p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" />
                     <div className="flex gap-1">
-                      <input type="number" value={editedValues.price} onChange={(e) => handleInputChange('price', e.target.value)} placeholder="Fiyat" step="0.01" min="0" className="flex-grow p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" />
+                      <input type="number" value={editedValues.price || ''} onChange={(e) => handleInputChange('price', e.target.value)} placeholder="Fiyat" step="0.01" min="0" className="flex-grow p-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]" />
                       <span className="flex items-center px-2 text-sm text-gray-600">TL</span>
                     </div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button onClick={() => handleSave(product.id)} disabled={savingId === product.id} className="flex-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm font-medium">
+                    <button onClick={() => handleSave(product.id)} disabled={savingId === product.id} style={{ backgroundColor: customGreenDark }} className="flex-1 text-white px-3 py-2 rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm font-medium">
                       <FontAwesomeIcon icon={savingId === product.id ? faSpinner : faSave} className={savingId === product.id ? 'animate-spin' : ''} />
                       {savingId === product.id ? 'Kaydediliyor...' : 'Kaydet'}
                     </button>
